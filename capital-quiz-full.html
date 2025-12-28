@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Capital Quiz Pro - Full Edition</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #121212;
+  color: #ffffff;
+  padding: 20px;
+  text-align: center;
+}
+select, input, button {
+  width: 100%;
+  max-width: 360px;
+  padding: 12px;
+  margin: 8px 0;
+  font-size: 16px;
+  border-radius: 6px;
+  border: none;
+}
+select, input { background: #1e1e1e; color: white; }
+button { background: #2979ff; color: white; }
+button:hover { background: #1c54b2; }
+#question { font-size: 22px; margin: 20px 0; }
+.correct { color: #4caf50; }
+.accepted { color: #ffeb3b; }
+.wrong { color: #f44336; }
+#score { margin-top: 10px; font-size: 18px; }
+</style>
+</head>
+
+<body>
+
+<h1>🌍 Capital Quiz Pro - Full Edition</h1>
+
+<label>Category:</label>
+<select id="category">
+  <option value="world">World</option>
+  <option value="india">India</option>
+  <option value="canada">Canada</option>
+</select>
+
+<label>Difficulty:</label>
+<select id="difficulty">
+  <option value="easy">Easy</option>
+  <option value="medium">Medium</option>
+  <option value="hard">Hard</option>
+</select>
+
+<label>
+  <input type="checkbox" id="mcMode"> Multiple Choice Mode
+</label>
+
+<div id="question"></div>
+<div id="answerArea"></div>
+
+<button onclick="submitAnswer()">Submit</button>
+<button onclick="nextQuestion()">Next</button>
+<button onclick="resetScore()">Reset Score</button>
+
+<div id="result"></div>
+<div id="score">Score: 0 / 0</div>
+
+<script>
+// -------- SOUNDS --------
+const soundCorrect = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
+const soundWrong = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+
+// -------- SCORE --------
+let score = 0;
+let total = 0;
+
+// -------- DATA --------
+const worldCapitals = {
+"Afghanistan":["Kabul"],"Albania":["Tirana"],"Algeria":["Algiers"],"Andorra":["Andorra la Vella"],
+"Angola":["Luanda"],"Antigua and Barbuda":["Saint John's"],"Argentina":["Buenos Aires"],
+"Armenia":["Yerevan"],"Australia":["Canberra"],"Austria":["Vienna"],"Azerbaijan":["Baku"],
+"Bahamas":["Nassau"],"Bahrain":["Manama"],"Bangladesh":["Dhaka"],"Barbados":["Bridgetown"],
+"Belarus":["Minsk"],"Belgium":["Brussels"],"Belize":["Belmopan"],"Benin":["Porto-Novo"],
+"Bhutan":["Thimphu"],"Bolivia":["La Paz","Sucre"],"Bosnia and Herzegovina":["Sarajevo"],
+"Botswana":["Gaborone"],"Brazil":["Brasilia"],"Brunei":["Bandar Seri Begawan"],
+"Bulgaria":["Sofia"],"Burkina Faso":["Ouagadougou"],"Burundi":["Gitega"],
+"Cambodia":["Phnom Penh"],"Cameroon":["Yaounde"],"Canada":["Ottawa"],
+"Chile":["Santiago"],"China":["Beijing"],"Colombia":["Bogota"],"Comoros":["Moroni"],
+"Costa Rica":["San Jose"],"Croatia":["Zagreb"],"Cuba":["Havana"],"Cyprus":["Nicosia"],
+"Czech Republic":["Prague"],"Denmark":["Copenhagen"],"Djibouti":["Djibouti"],
+"Dominica":["Roseau"],"Dominican Republic":["Santo Domingo"],"Ecuador":["Quito"],
+"Egypt":["Cairo"],"El Salvador":["San Salvador"],"Estonia":["Tallinn"],"Eswatini":["Mbabane","Lobamba"],
+"Ethiopia":["Addis Ababa"],"Fiji":["Suva"],"Finland":["Helsinki"],"France":["Paris"],
+"Gabon":["Libreville"],"Gambia":["Banjul"],"Georgia":["Tbilisi"],"Germany":["Berlin"],
+"Ghana":["Accra"],"Greece":["Athens"],"Grenada":["St. George's"],"Guatemala":["Guatemala City"],
+"Guinea":["Conakry"],"Guyana":["Georgetown"],"Haiti":["Port-au-Prince"],"Honduras":["Tegucigalpa"],
+"Hungary":["Budapest"],"Iceland":["Reykjavik"],"India":["New Delhi"],"Indonesia":["Jakarta"],
+"Iran":["Tehran"],"Iraq":["Baghdad"],"Ireland":["Dublin"],"Israel":["Jerusalem","Tel Aviv"],
+"Italy":["Rome"],"Jamaica":["Kingston"],"Japan":["Tokyo"],"Jordan":["Amman"],
+"Kazakhstan":["Astana"],"Kenya":["Nairobi"],"Kosovo":["Pristina"],"Kuwait":["Kuwait City"],
+"Kyrgyzstan":["Bishkek"],"Laos":["Vientiane"],"Latvia":["Riga"],"Lebanon":["Beirut"],
+"Lesotho":["Maseru"],"Liberia":["Monrovia"],"Libya":["Tripoli"],"Liechtenstein":["Vaduz"],
+"Lithuania":["Vilnius"],"Luxembourg":["Luxembourg"],"Madagascar":["Antananarivo"],
+"Malawi":["Lilongwe"],"Malaysia":["Kuala Lumpur"],"Maldives":["Male"],"Mali":["Bamako"],
+"Malta":["Valletta"],"Mauritania":["Nouakchott"],"Mauritius":["Port Louis"],
+"Mexico":["Mexico City"],"Moldova":["Chisinau"],"Monaco":["Monaco"],"Mongolia":["Ulaanbaatar"],
+"Montenegro":["Podgorica"],"Morocco":["Rabat"],"Mozambique":["Maputo"],"Myanmar":["Naypyidaw"],
+"Namibia":["Windhoek"],"Nepal":["Kathmandu"],"Netherlands":["Amsterdam"],
+"New Zealand":["Wellington"],"Nicaragua":["Managua"],"Niger":["Niamey"],
+"Nigeria":["Abuja"],"North Korea":["Pyongyang"],"North Macedonia":["Skopje"],
+"Norway":["Oslo"],"Oman":["Muscat"],"Pakistan":["Islamabad"],"Palestine":["Ramallah"],
+"Panama":["Panama City"],"Papua New Guinea":["Port Moresby"],"Paraguay":["Asuncion"],
+"Peru":["Lima"],"Philippines":["Manila"],"Poland":["Warsaw"],"Portugal":["Lisbon"],
+"Qatar":["Doha"],"Romania":["Bucharest"],"Russia":["Moscow"],"Rwanda":["Kigali"],
+"Saint Kitts and Nevis":["Basseterre"],"Saint Lucia":["Castries"],"Saint Vincent and the Grenadines":["Kingstown"],
+"Samoa":["Apia"],"San Marino":["San Marino"],"Sao Tome and Principe":["Sao Tome"],
+"Saudi Arabia":["Riyadh"],"Senegal":["Dakar"],"Serbia":["Belgrade"],"Seychelles":["Victoria"],
+"Sierra Leone":["Freetown"],"Singapore":["Singapore"],"Slovakia":["Bratislava"],
+"Slovenia":["Ljubljana"],"Solomon Islands":["Honiara"],"Somalia":["Mogadishu"],
+"South Africa":["Pretoria","Cape Town","Bloemfontein"],"South Korea":["Seoul"],
+"South Sudan":["Juba"],"Spain":["Madrid"],"Sri Lanka":["Sri Jayawardenepura Kotte","Colombo"],
+"Sudan":["Khartoum"],"Suriname":["Paramaribo"],"Sweden":["Stockholm"],"Switzerland":["Bern"],
+"Syria":["Damascus"],"Taiwan":["Taipei"],"Tajikistan":["Dushanbe"],"Tanzania":["Dodoma"],
+"Thailand":["Bangkok"],"Timor-Leste":["Dili"],"Togo":["Lome"],"Tonga":["Nuku'alofa"],
+"Trinidad and Tobago":["Port of Spain"],"Tunisia":["Tunis"],"Turkey":["Ankara"],
+"Turkmenistan":["Ashgabat"],"Tuvalu":["Funafuti"],"Uganda":["Kampala"],"Ukraine":["Kyiv"],
+"United Arab Emirates":["Abu Dhabi"],"United Kingdom":["London"],"United States":["Washington D.C."],
+"Uruguay":["Montevideo"],"Uzbekistan":["Tashkent"],"Vanuatu":["Port Vila"],
+"Vatican City":["Vatican City"],"Venezuela":["Caracas"],"Vietnam":["Hanoi"],
+"Yemen":["Sana'a"],"Zambia":["Lusaka"],"Zimbabwe":["Harare"]
+};
+
+const indiaCapitals = {
+"Andhra Pradesh":["Amaravati"],"Arunachal Pradesh":["Itanagar"],"Assam":["Dispur"],
+"Bihar":["Patna"],"Chhattisgarh":["Raipur"],"Goa":["Panaji"],"Gujarat":["Gandhinagar"],
+"Haryana":["Chandigarh"],"Himachal Pradesh":["Shimla"],"Jharkhand":["Ranchi"],
+"Karnataka":["Bengaluru"],"Kerala":["Thiruvananthapuram"],"Madhya Pradesh":["Bhopal"],
+"Maharashtra":["Mumbai"],"Manipur":["Imphal"],"Meghalaya":["Shillong"],"Mizoram":["Aizawl"],
+"Nagaland":["Kohima"],"Odisha":["Bhubaneswar"],"Punjab":["Chandigarh"],"Rajasthan":["Jaipur"],
+"Sikkim":["Gangtok"],"Tamil Nadu":["Chennai"],"Telangana":["Hyderabad"],
+"Tripura":["Agartala"],"Uttar Pradesh":["Lucknow"],"Uttarakhand":["Dehradun"],
+"West Bengal":["Kolkata"]
+};
+
+const canadaCapitals = {
+"Alberta":["Edmonton"],"British Columbia":["Victoria"],"Manitoba":["Winnipeg"],
+"New Brunswick":["Fredericton"],"Newfoundland and Labrador":["St. John's"],
+"Nova Scotia":["Halifax"],"Ontario":["Toronto"],"Prince Edward Island":["Charlottetown"],
+"Quebec":["Quebec City"],"Saskatchewan":["Regina"],"Northwest Territories":["Yellowknife"],
+"Nunavut":["Iqaluit"],"Yukon":["Whitehorse"]
+};
+
+// -------- GAME STATE --------
+let currentAnswer = [];
+
+// -------- STRING HELPERS --------
+function normalize(str) {
+  return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z\s]/g,"").replace(/\s+/g," ").trim();
+}
+
+function levenshtein(a,b){const matrix=Array.from({length:b.length+1},(_,i)=>[i]);for(let j=0;j<=a.length;j++)matrix[0][j]=j;for(let i=1;i<=b.length;i++){for(let j=1;j<=a.length;j++){matrix[i][j]=b[i-1]===a[j-1]?matrix[i-1][j-1]:Math.min(matrix[i-1][j-1]+1,matrix[i][j-1]+1,matrix[i-1][j]+1)}}return matrix[b.length][a.length];}
+
+function similarity(a,b){return 1-levenshtein(a,b)/Math.max(a.length,b.length);}
+
+// -------- GAME FUNCTIONS --------
+function getCurrentCategoryData(){
+  const cat=document.getElementById("category").value;
+  if(cat==="india") return indiaCapitals;
+  if(cat==="canada") return canadaCapitals;
+  return worldCapitals;
+}
+
+function nextQuestion(){
+  document.getElementById("result").innerHTML="";
+  document.getElementById("answerArea").innerHTML="";
+  const data=getCurrentCategoryData();
+  const keys=Object.keys(data);
+  const country=keys[Math.floor(Math.random()*keys.length)];
+  currentAnswer=data[country];
+  document.getElementById("question").innerText=
+    (document.getElementById("category").value==="world"?"Capital of ":"Capital of ")+country+"?";
+  renderInput();
+}
+
+function renderInput(){
+  const area=document.getElementById("answerArea");
+  const mc=document.getElementById("mcMode").checked;
+  area.innerHTML="";
+  if(mc){
+    let choices=[currentAnswer[0]];
+    const allValues=Object.values(getCurrentCategoryData()).flat();
+    while(choices.length<4){const rand=allValues[Math.floor(Math.random()*allValues.length)];if(!choices.includes(rand))choices.push(rand);}
+    choices.sort(()=>Math.random()-0.5);
+    choices.forEach(c=>{const btn=document.createElement("button");btn.innerText=c;btn.onclick=()=>submitAnswer(c);area.appendChild(btn);});
+  } else {
+    area.innerHTML=`<input type="text" id="textAnswer" placeholder="Type answer">`;
+  }
+}
+
+function submitAnswer(selected){
+  let userAnswer=selected;
+  const inputField=document.getElementById("textAnswer");
+  if(!userAnswer&&inputField)userAnswer=inputField.value.trim();
+  if(!userAnswer)return;
+  total++;
+  const difficulty=document.getElementById("difficulty").value;
+  const user=normalize(userAnswer);
+  let accepted=false;
+  for(let ans of currentAnswer){
+    const correct=normalize(ans);
+    if(user===correct){accepted="exact";break;}
+    else if(difficulty!=="hard"&&similarity(user,correct)>=(difficulty==="easy"?0.75:0.85)){accepted="tolerant";break;}
+  }
+  if(accepted){
+    score++;
+    soundCorrect.play();
+    document.getElementById("result").innerHTML=accepted==="exact"?`<div class="correct">✅ Correct!</div>`:`<div class="accepted">🟡 Accepted (minor spelling error)</div>`;
+  } else {
+    soundWrong.play();
+    document.getElementById("result").innerHTML=`<div class="wrong">❌ Wrong. Correct: ${currentAnswer.join(", ")}</div>`;
+  }
+  document.getElementById("score").innerText=`Score: ${score} / ${total}`;
+}
+
+function resetScore(){score=0;total=0;document.getElementById("score").innerText="Score: 0 / 0";document.getElementById("result").innerHTML="";}
+
+nextQuestion();
+</script>
+
+</body>
+</html>
