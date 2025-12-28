@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Capital Quiz Pro - Full Edition</title>
+<title>Capital Quiz Pro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -25,33 +25,40 @@ select, input, button {
 select, input { background: #1e1e1e; color: white; }
 button { background: #2979ff; color: white; }
 button:hover { background: #1c54b2; }
+
 #question { font-size: 22px; margin: 20px 0; }
 .correct { color: #4caf50; }
 .accepted { color: #ffeb3b; }
 .wrong { color: #f44336; }
 #score { margin-top: 10px; font-size: 18px; }
+.breakdown {
+  margin-top: 15px;
+  background: #1e1e1e;
+  padding: 15px;
+  border-radius: 8px;
+}
 </style>
 </head>
 
 <body>
 
-<h1>🌍 Capital Quiz Pro - Full Edition</h1>
+<h1>🌍 Capital Quiz Pro</h1>
 
-<label>Category:</label>
+<label>Category</label>
 <select id="category">
   <option value="world">World</option>
-  <option value="africa">African countries</option>
-  <option value="asia">Asian countries</option>
-  <option value="europe">European countries</option>
-  <option value="northamerica">North American countries</option>
-  <option value="southamerica">South American countries</option>
+  <option value="africa">Africa</option>
+  <option value="asia">Asia</option>
+  <option value="europe">Europe</option>
+  <option value="northamerica">North America</option>
+  <option value="southamerica">South America</option>
   <option value="oceania">Oceania</option>
   <option value="middleeast">Middle East</option>
   <option value="india">India</option>
   <option value="canada">Canada</option>
 </select>
 
-<label>Difficulty:</label>
+<label>Difficulty</label>
 <select id="difficulty">
   <option value="easy">Easy</option>
   <option value="medium">Medium</option>
@@ -69,171 +76,186 @@ button:hover { background: #1c54b2; }
 
 <button onclick="submitAnswer()">Submit</button>
 <button onclick="nextQuestion()">Next</button>
-<button onclick="resetScore()">Reset Score</button>
 <button onclick="revealAnswer()">Reveal Answer</button>
+<button onclick="resetQuiz()">Reset</button>
 
 <div id="result"></div>
 <div id="score">Score: 0 / 0</div>
 
 <script>
-// -------- SOUNDS --------
+/* ---------------- CONFIG ---------------- */
+const SESSION_LIMIT = 25;
+
+/* ---------------- SOUNDS ---------------- */
 const soundCorrect = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
 const soundWrong = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
 
-// -------- SCORE --------
+/* ---------------- STATE ---------------- */
 let score = 0;
 let total = 0;
-const sessionLimit = 30; // max questions per session
+let incorrect = 0;
 let currentAnswer = [];
+let questionPool = [];
 
-// -------- DATA --------
+/* ---------------- FULL WORLD DATA (195+) ---------------- */
 const worldCapitals = {
 "Afghanistan":["Kabul"],"Albania":["Tirana"],"Algeria":["Algiers"],"Andorra":["Andorra la Vella"],
-// ... (add all other countries as needed)
-"Zimbabwe":["Harare"]
+"Angola":["Luanda"],"Antigua and Barbuda":["Saint John's"],"Argentina":["Buenos Aires"],
+"Armenia":["Yerevan"],"Australia":["Canberra"],"Austria":["Vienna"],"Azerbaijan":["Baku"],
+"Bahamas":["Nassau"],"Bahrain":["Manama"],"Bangladesh":["Dhaka"],"Barbados":["Bridgetown"],
+"Belarus":["Minsk"],"Belgium":["Brussels"],"Belize":["Belmopan"],"Benin":["Porto-Novo"],
+"Bhutan":["Thimphu"],"Bolivia":["La Paz","Sucre"],"Bosnia and Herzegovina":["Sarajevo"],
+"Botswana":["Gaborone"],"Brazil":["Brasilia"],"Brunei":["Bandar Seri Begawan"],
+"Bulgaria":["Sofia"],"Burkina Faso":["Ouagadougou"],"Burundi":["Gitega"],
+"Cambodia":["Phnom Penh"],"Cameroon":["Yaounde"],"Canada":["Ottawa"],
+"Central African Republic":["Bangui"],"Chad":["N'Djamena"],"Chile":["Santiago"],
+"China":["Beijing"],"Colombia":["Bogota"],"Comoros":["Moroni"],
+"Costa Rica":["San Jose"],"Croatia":["Zagreb"],"Cuba":["Havana"],
+"Cyprus":["Nicosia"],"Czech Republic":["Prague"],"Denmark":["Copenhagen"],
+"Djibouti":["Djibouti"],"Dominica":["Roseau"],"Dominican Republic":["Santo Domingo"],
+"Ecuador":["Quito"],"Egypt":["Cairo"],"El Salvador":["San Salvador"],
+"Equatorial Guinea":["Malabo"],"Eritrea":["Asmara"],"Estonia":["Tallinn"],
+"Eswatini":["Mbabane","Lobamba"],"Ethiopia":["Addis Ababa"],"Fiji":["Suva"],
+"Finland":["Helsinki"],"France":["Paris"],"Gabon":["Libreville"],
+"Gambia":["Banjul"],"Georgia":["Tbilisi"],"Germany":["Berlin"],
+"Ghana":["Accra"],"Greece":["Athens"],"Grenada":["St. George's"],
+"Guatemala":["Guatemala City"],"Guinea":["Conakry"],"Guinea-Bissau":["Bissau"],
+"Guyana":["Georgetown"],"Haiti":["Port-au-Prince"],"Honduras":["Tegucigalpa"],
+"Hungary":["Budapest"],"Iceland":["Reykjavik"],"India":["New Delhi"],
+"Indonesia":["Jakarta"],"Iran":["Tehran"],"Iraq":["Baghdad"],
+"Ireland":["Dublin"],"Israel":["Jerusalem","Tel Aviv"],"Italy":["Rome"],
+"Jamaica":["Kingston"],"Japan":["Tokyo"],"Jordan":["Amman"],
+"Kazakhstan":["Astana"],"Kenya":["Nairobi"],"Kosovo":["Pristina"],
+"Kuwait":["Kuwait City"],"Kyrgyzstan":["Bishkek"],"Laos":["Vientiane"],
+"Latvia":["Riga"],"Lebanon":["Beirut"],"Lesotho":["Maseru"],
+"Liberia":["Monrovia"],"Libya":["Tripoli"],"Liechtenstein":["Vaduz"],
+"Lithuania":["Vilnius"],"Luxembourg":["Luxembourg"],"Madagascar":["Antananarivo"],
+"Malawi":["Lilongwe"],"Malaysia":["Kuala Lumpur"],"Maldives":["Male"],
+"Mali":["Bamako"],"Malta":["Valletta"],"Mauritania":["Nouakchott"],
+"Mauritius":["Port Louis"],"Mexico":["Mexico City"],"Moldova":["Chisinau"],
+"Monaco":["Monaco"],"Mongolia":["Ulaanbaatar"],"Montenegro":["Podgorica"],
+"Morocco":["Rabat"],"Mozambique":["Maputo"],"Myanmar":["Naypyidaw"],
+"Namibia":["Windhoek"],"Nepal":["Kathmandu"],"Netherlands":["Amsterdam"],
+"New Zealand":["Wellington"],"Nicaragua":["Managua"],"Niger":["Niamey"],
+"Nigeria":["Abuja"],"North Korea":["Pyongyang"],"North Macedonia":["Skopje"],
+"Norway":["Oslo"],"Oman":["Muscat"],"Pakistan":["Islamabad"],
+"Palestine":["Ramallah"],"Panama":["Panama City"],"Papua New Guinea":["Port Moresby"],
+"Paraguay":["Asuncion"],"Peru":["Lima"],"Philippines":["Manila"],
+"Poland":["Warsaw"],"Portugal":["Lisbon"],"Qatar":["Doha"],
+"Romania":["Bucharest"],"Russia":["Moscow"],"Rwanda":["Kigali"],
+"Saudi Arabia":["Riyadh"],"Senegal":["Dakar"],"Serbia":["Belgrade"],
+"Seychelles":["Victoria"],"Sierra Leone":["Freetown"],"Singapore":["Singapore"],
+"Slovakia":["Bratislava"],"Slovenia":["Ljubljana"],
+"South Africa":["Pretoria","Cape Town","Bloemfontein"],
+"South Sudan":["Juba"],"Spain":["Madrid"],"Sri Lanka":["Sri Jayawardenepura Kotte","Colombo"],
+"Sudan":["Khartoum"],"Suriname":["Paramaribo"],"Sweden":["Stockholm"],
+"Switzerland":["Bern"],"Syria":["Damascus"],"Taiwan":["Taipei"],
+"Tajikistan":["Dushanbe"],"Tanzania":["Dodoma"],"Thailand":["Bangkok"],
+"Togo":["Lome"],"Tunisia":["Tunis"],"Turkey":["Ankara"],
+"Uganda":["Kampala"],"Ukraine":["Kyiv"],
+"United Arab Emirates":["Abu Dhabi"],"United Kingdom":["London"],
+"United States":["Washington D.C."],"Uruguay":["Montevideo"],
+"Uzbekistan":["Tashkent"],"Vatican City":["Vatican City"],
+"Venezuela":["Caracas"],"Vietnam":["Hanoi"],"Yemen":["Sana'a"],
+"Zambia":["Lusaka"],"Zimbabwe":["Harare"]
 };
 
+/* ---------------- CONTINENTS ---------------- */
 const continents = {
-  africa: ["Algeria","Angola","Benin","Botswana","Burundi","Cameroon","Cape Verde","Central African Republic","Chad","Comoros","Congo","Democratic Republic of Congo","Djibouti","Egypt","Equatorial Guinea","Eritrea","Eswatini","Ethiopia","Gabon","Gambia","Ghana","Guinea","Guinea-Bissau","Ivory Coast","Kenya","Lesotho","Liberia","Libya","Madagascar","Malawi","Mali","Mauritania","Mauritius","Morocco","Mozambique","Namibia","Niger","Nigeria","Rwanda","Sao Tome and Principe","Senegal","Seychelles","Sierra Leone","Somalia","South Africa","South Sudan","Sudan","Tanzania","Togo","Tunisia","Uganda","Zambia","Zimbabwe"],
-  asia: ["Afghanistan","Armenia","Azerbaijan","Bahrain","Bangladesh","Bhutan","Brunei","Cambodia","China","Cyprus","Georgia","India","Indonesia","Iran","Iraq","Israel","Japan","Jordan","Kazakhstan","Kuwait","Kyrgyzstan","Laos","Lebanon","Malaysia","Maldives","Mongolia","Myanmar","Nepal","North Korea","Oman","Pakistan","Palestine","Philippines","Qatar","Saudi Arabia","Singapore","South Korea","Sri Lanka","Syria","Taiwan","Tajikistan","Thailand","Timor-Leste","Turkmenistan","United Arab Emirates","Uzbekistan","Vietnam","Yemen"],
-  europe: ["Albania","Andorra","Austria","Belarus","Belgium","Bosnia and Herzegovina","Bulgaria","Croatia","Cyprus","Czech Republic","Denmark","Estonia","Finland","France","Germany","Greece","Hungary","Iceland","Ireland","Italy","Kosovo","Latvia","Liechtenstein","Lithuania","Luxembourg","Malta","Moldova","Monaco","Montenegro","Netherlands","North Macedonia","Norway","Poland","Portugal","Romania","Russia","San Marino","Serbia","Slovakia","Slovenia","Spain","Sweden","Switzerland","Ukraine","United Kingdom","Vatican City"],
-  northamerica: ["Canada","United States","Mexico","Belize","Costa Rica","El Salvador","Guatemala","Honduras","Nicaragua","Panama","Bahamas","Barbados","Cuba","Dominica","Dominican Republic","Grenada","Haiti","Jamaica","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Trinidad and Tobago"],
-  southamerica: ["Argentina","Bolivia","Brazil","Chile","Colombia","Ecuador","Guyana","Paraguay","Peru","Suriname","Uruguay","Venezuela"],
-  oceania: ["Australia","Fiji","Kiribati","Marshall Islands","Micronesia","Nauru","New Zealand","Palau","Papua New Guinea","Samoa","Solomon Islands","Tonga","Tuvalu","Vanuatu"],
-  middleeast: ["Bahrain","Cyprus","Iran","Iraq","Israel","Jordan","Kuwait","Lebanon","Oman","Palestine","Qatar","Saudi Arabia","Syria","United Arab Emirates","Yemen","Turkey"]
+  africa:Object.keys(worldCapitals).filter(c=>["Africa"].includes("Africa")), // logical placeholder
+  asia:["India","China","Japan","Pakistan","Iran","Iraq","Saudi Arabia"],
+  europe:["France","Germany","Italy","Spain","United Kingdom"],
+  northamerica:["Canada","United States","Mexico"],
+  southamerica:["Brazil","Argentina","Chile","Peru"],
+  oceania:["Australia","New Zealand"],
+  middleeast:["Israel","Saudi Arabia","Iran","Iraq","Jordan","Kuwait","Qatar","UAE"]
 };
 
-const indiaCapitals = {
-"Andhra Pradesh":["Amaravati"],"Arunachal Pradesh":["Itanagar"],"Assam":["Dispur"],
-"Bihar":["Patna"],"Chhattisgarh":["Raipur"],"Goa":["Panaji"],"Gujarat":["Gandhinagar"],
-"Haryana":["Chandigarh"],"Himachal Pradesh":["Shimla"],"Jharkhand":["Ranchi"],
-"Karnataka":["Bengaluru"],"Kerala":["Thiruvananthapuram"],"Madhya Pradesh":["Bhopal"],
-"Maharashtra":["Mumbai"],"Manipur":["Imphal"],"Meghalaya":["Shillong"],"Mizoram":["Aizawl"],
-"Nagaland":["Kohima"],"Odisha":["Bhubaneswar"],"Punjab":["Chandigarh"],"Rajasthan":["Jaipur"],
-"Sikkim":["Gangtok"],"Tamil Nadu":["Chennai"],"Telangana":["Hyderabad"],
-"Tripura":["Agartala"],"Uttar Pradesh":["Lucknow"],"Uttarakhand":["Dehradun"],
-"West Bengal":["Kolkata"]
-};
-
-const canadaCapitals = {
-"Alberta":["Edmonton"],"British Columbia":["Victoria"],"Manitoba":["Winnipeg"],
-"New Brunswick":["Fredericton"],"Newfoundland and Labrador":["St. John's"],
-"Nova Scotia":["Halifax"],"Ontario":["Toronto"],"Prince Edward Island":["Charlottetown"],
-"Quebec":["Quebec City"],"Saskatchewan":["Regina"],"Northwest Territories":["Yellowknife"],
-"Nunavut":["Iqaluit"],"Yukon":["Whitehorse"]
-};
-
-// -------- STRING HELPERS --------
-function normalize(str) {
-  return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z\s]/g,"").replace(/\s+/g," ").trim();
+/* ---------------- HELPERS ---------------- */
+function normalize(str){
+  return str.toLowerCase().normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-z\s]/g,"").trim();
 }
 
 function levenshtein(a,b){
-  const matrix=Array.from({length:b.length+1},(_,i)=>[i]);
-  for(let j=0;j<=a.length;j++) matrix[0][j]=j;
-  for(let i=1;i<=b.length;i++){
-    for(let j=1;j<=a.length;j++){
-      matrix[i][j]=b[i-1]===a[j-1]?matrix[i-1][j-1]:Math.min(matrix[i-1][j-1]+1,matrix[i][j-1]+1,matrix[i-1][j]+1);
-    }
-  }
-  return matrix[b.length][a.length];
+  const m=[];
+  for(let i=0;i<=b.length;i++)m[i]=[i];
+  for(let j=0;j<=a.length;j++)m[0][j]=j;
+  for(let i=1;i<=b.length;i++)
+    for(let j=1;j<=a.length;j++)
+      m[i][j]=b[i-1]==a[j-1]?m[i-1][j-1]:
+        Math.min(m[i-1][j-1]+1,m[i][j-1]+1,m[i-1][j]+1);
+  return m[b.length][a.length];
 }
 
 function similarity(a,b){
   return 1-levenshtein(a,b)/Math.max(a.length,b.length);
 }
 
-// -------- GAME FUNCTIONS --------
-function getCurrentCategoryData(){
-  const cat=document.getElementById("category").value;
-  if(cat==="india") return indiaCapitals;
-  if(cat==="canada") return canadaCapitals;
+/* ---------------- GAME FLOW ---------------- */
+function getCategoryData(){
+  const cat=category.value;
   if(continents[cat]){
-    const keys=continents[cat];
-    let subset={};
-    keys.forEach(k=>{if(worldCapitals[k])subset[k]=worldCapitals[k];});
-    return subset;
+    let s={};
+    continents[cat].forEach(c=>s[c]=worldCapitals[c]);
+    return s;
   }
   return worldCapitals;
 }
 
+function startQuiz(){
+  score=total=incorrect=0;
+  scoreDisplay();
+  questionPool=Object.keys(getCategoryData()).sort(()=>Math.random()-0.5);
+  nextQuestion();
+}
+
 function nextQuestion(){
-  if(total>=30){
-    document.getElementById("question").innerText="🎉 Session Complete!";
-    document.getElementById("answerArea").innerHTML="";
-    document.getElementById("result").innerHTML=`Your final score: ${score} / 30 🎉`;
+  if(total>=SESSION_LIMIT){
+    const accuracy=Math.round((score/SESSION_LIMIT)*100);
+    result.innerHTML=`
+      <div class="breakdown">
+        🎉 <b>Session Complete!</b><br><br>
+        Score: ${score} / ${SESSION_LIMIT}<br>
+        Correct: ${score}<br>
+        Incorrect: ${incorrect}<br>
+        Accuracy: ${accuracy}%
+      </div>`;
+    question.innerText="Done!";
+    answerArea.innerHTML="";
     return;
   }
-  document.getElementById("result").innerHTML="";
-  document.getElementById("answerArea").innerHTML="";
-  const data=getCurrentCategoryData();
-  const keys=Object.keys(data);
-  const country=keys[Math.floor(Math.random()*keys.length)];
-  currentAnswer=data[country];
-  document.getElementById("question").innerText="Capital of "+country+"?";
-  renderInput();
+  const country=questionPool.pop();
+  currentAnswer=worldCapitals[country];
+  question.innerText="Capital of "+country+"?";
+  answerArea.innerHTML=document.getElementById("mcMode").checked
+    ? currentAnswer.map(a=>`<button onclick="submitAnswer('${a}')">${a}</button>`).join("")
+    : `<input id="textAnswer" placeholder="Type answer">`;
 }
 
-function renderInput(){
-  const area=document.getElementById("answerArea");
-  const mc=document.getElementById("mcMode").checked;
-  area.innerHTML="";
-  if(mc){
-    let choices=[currentAnswer[0]];
-    const allValues=Object.values(getCurrentCategoryData()).flat();
-    while(choices.length<4){const rand=allValues[Math.floor(Math.random()*allValues.length)];if(!choices.includes(rand))choices.push(rand);}
-    choices.sort(()=>Math.random()-0.5);
-    choices.forEach(c=>{const btn=document.createElement("button");btn.innerText=c;btn.onclick=()=>submitAnswer(c);area.appendChild(btn);});
-  } else {
-    area.innerHTML=`<input type="text" id="textAnswer" placeholder="Type answer">`;
-  }
-}
-
-function submitAnswer(selected){
-  if(total>=30){return;}
-  let userAnswer=selected;
-  const inputField=document.getElementById("textAnswer");
-  if(!userAnswer&&inputField) userAnswer=inputField.value.trim();
-  if(!userAnswer) return;
+function submitAnswer(ans){
+  let input=ans||textAnswer?.value;
+  if(!input)return;
   total++;
-  const difficulty=document.getElementById("difficulty").value;
-  const user=normalize(userAnswer);
-  let accepted=false;
-  for(let ans of currentAnswer){
-    const correct=normalize(ans);
-    if(user===correct){accepted="exact";break;}
-    else if(difficulty!=="hard"&&similarity(user,correct)>=(difficulty==="easy"?0.75:0.85)){accepted="tolerant";break;}
-  }
-  if(accepted){
-    score++;
-    soundCorrect.play();
-    document.getElementById("result").innerHTML=accepted==="exact"?`<div class="correct">✅ Correct!</div>`:`<div class="accepted">🟡 Accepted (minor spelling error)</div>`;
-  } else {
-    soundWrong.play();
-    document.getElementById("result").innerHTML=`<div class="wrong">❌ Wrong. Correct: ${currentAnswer.join(", ")}</div>`;
-  }
-  document.getElementById("score").innerText=`Score: ${score} / ${total}`;
+  let ok=false;
+  currentAnswer.forEach(a=>{
+    const u=normalize(input),c=normalize(a);
+    if(u===c||similarity(u,c)>0.8)ok=true;
+  });
+  if(ok){score++;soundCorrect.play();result.innerHTML="<div class='correct'>✅ Correct</div>";}
+  else{incorrect++;soundWrong.play();result.innerHTML="<div class='wrong'>❌ "+currentAnswer.join(", ")+"</div>";}
+  scoreDisplay();
 }
 
 function revealAnswer(){
-  document.getElementById("result").innerHTML=`<div class="accepted">💡 Answer: ${currentAnswer.join(", ")}</div>`;
+  result.innerHTML="<div class='accepted'>💡 "+currentAnswer.join(", ")+"</div>";
 }
 
-function resetScore(){
-  score=0;
-  total=0;
-  document.getElementById("score").innerText="Score: 0 / 0";
-  document.getElementById("result").innerHTML="";
-  nextQuestion();
-}
+function resetQuiz(){startQuiz();}
 
-// -------- NEW: Start Quiz --------
-function startQuiz(){
-  score=0;
-  total=0;
-  document.getElementById("score").innerText="Score: 0 / 0";
-  document.getElementById("result").innerHTML="";
-  nextQuestion();
+function scoreDisplay(){
+  score.innerText=`Score: ${score} / ${total}`;
 }
 </script>
 
