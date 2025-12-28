@@ -62,6 +62,8 @@ button:hover { background: #1c54b2; }
   <input type="checkbox" id="mcMode"> Multiple Choice Mode
 </label>
 
+<button onclick="startQuiz()">Start Quiz</button>
+
 <div id="question"></div>
 <div id="answerArea"></div>
 
@@ -82,16 +84,15 @@ const soundWrong = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_
 let score = 0;
 let total = 0;
 const sessionLimit = 30; // max questions per session
+let currentAnswer = [];
 
 // -------- DATA --------
-// Full World data (example, replace with complete)
 const worldCapitals = {
 "Afghanistan":["Kabul"],"Albania":["Tirana"],"Algeria":["Algiers"],"Andorra":["Andorra la Vella"],
-// ... rest of countries
+// ... (add all other countries as needed)
 "Zimbabwe":["Harare"]
 };
 
-// Continent subsets
 const continents = {
   africa: ["Algeria","Angola","Benin","Botswana","Burundi","Cameroon","Cape Verde","Central African Republic","Chad","Comoros","Congo","Democratic Republic of Congo","Djibouti","Egypt","Equatorial Guinea","Eritrea","Eswatini","Ethiopia","Gabon","Gambia","Ghana","Guinea","Guinea-Bissau","Ivory Coast","Kenya","Lesotho","Liberia","Libya","Madagascar","Malawi","Mali","Mauritania","Mauritius","Morocco","Mozambique","Namibia","Niger","Nigeria","Rwanda","Sao Tome and Principe","Senegal","Seychelles","Sierra Leone","Somalia","South Africa","South Sudan","Sudan","Tanzania","Togo","Tunisia","Uganda","Zambia","Zimbabwe"],
   asia: ["Afghanistan","Armenia","Azerbaijan","Bahrain","Bangladesh","Bhutan","Brunei","Cambodia","China","Cyprus","Georgia","India","Indonesia","Iran","Iraq","Israel","Japan","Jordan","Kazakhstan","Kuwait","Kyrgyzstan","Laos","Lebanon","Malaysia","Maldives","Mongolia","Myanmar","Nepal","North Korea","Oman","Pakistan","Palestine","Philippines","Qatar","Saudi Arabia","Singapore","South Korea","Sri Lanka","Syria","Taiwan","Tajikistan","Thailand","Timor-Leste","Turkmenistan","United Arab Emirates","Uzbekistan","Vietnam","Yemen"],
@@ -121,9 +122,6 @@ const canadaCapitals = {
 "Quebec":["Quebec City"],"Saskatchewan":["Regina"],"Northwest Territories":["Yellowknife"],
 "Nunavut":["Iqaluit"],"Yukon":["Whitehorse"]
 };
-
-// -------- GAME STATE --------
-let currentAnswer = [];
 
 // -------- STRING HELPERS --------
 function normalize(str) {
@@ -160,10 +158,10 @@ function getCurrentCategoryData(){
 }
 
 function nextQuestion(){
-  if(total>=sessionLimit){
+  if(total>=30){
     document.getElementById("question").innerText="🎉 Session Complete!";
     document.getElementById("answerArea").innerHTML="";
-    document.getElementById("result").innerHTML=`Your final score: ${score} / ${sessionLimit} 🎉`;
+    document.getElementById("result").innerHTML=`Your final score: ${score} / 30 🎉`;
     return;
   }
   document.getElementById("result").innerHTML="";
@@ -172,8 +170,7 @@ function nextQuestion(){
   const keys=Object.keys(data);
   const country=keys[Math.floor(Math.random()*keys.length)];
   currentAnswer=data[country];
-  document.getElementById("question").innerText=
-    (document.getElementById("category").value==="world"?"Capital of ":"Capital of ")+country+"?";
+  document.getElementById("question").innerText="Capital of "+country+"?";
   renderInput();
 }
 
@@ -193,7 +190,7 @@ function renderInput(){
 }
 
 function submitAnswer(selected){
-  if(total>=sessionLimit){return;}
+  if(total>=30){return;}
   let userAnswer=selected;
   const inputField=document.getElementById("textAnswer");
   if(!userAnswer&&inputField) userAnswer=inputField.value.trim();
@@ -218,6 +215,10 @@ function submitAnswer(selected){
   document.getElementById("score").innerText=`Score: ${score} / ${total}`;
 }
 
+function revealAnswer(){
+  document.getElementById("result").innerHTML=`<div class="accepted">💡 Answer: ${currentAnswer.join(", ")}</div>`;
+}
+
 function resetScore(){
   score=0;
   total=0;
@@ -226,12 +227,14 @@ function resetScore(){
   nextQuestion();
 }
 
-function revealAnswer(){
-  document.getElementById("result").innerHTML=`<div class="accepted">💡 Answer: ${currentAnswer.join(", ")}</div>`;
+// -------- NEW: Start Quiz --------
+function startQuiz(){
+  score=0;
+  total=0;
+  document.getElementById("score").innerText="Score: 0 / 0";
+  document.getElementById("result").innerHTML="";
+  nextQuestion();
 }
-
-// Start first question
-nextQuestion();
 </script>
 
 </body>
