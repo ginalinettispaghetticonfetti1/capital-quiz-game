@@ -66,6 +66,7 @@ button:disabled {
 .start-btn,
 .submit-btn {
   background: var(--accent);
+  font-weight: bold;
 }
 .start-btn:hover,
 .submit-btn:hover {
@@ -76,12 +77,23 @@ button:disabled {
 .next-btn {
   background: #4A4F7C;
 }
+.next-btn:hover {
+  background: #3F4369;
+}
+
 .reveal-btn {
   background: var(--warning);
   color: #2a2a2a;
 }
+.reveal-btn:hover {
+  background: #d6b44d;
+}
+
 .reset-btn {
   background: var(--error);
+}
+.reset-btn:hover {
+  background: #b85667;
 }
 
 /* ================= MC TOGGLE ================= */
@@ -89,25 +101,27 @@ button:disabled {
   text-align: left;
   max-width: 360px;
   margin: 10px auto 20px;
+  padding-left: 12px;
   color: var(--text-secondary);
 }
 
-/* ================= QUESTION ================= */
-#question {
-  font-size: 22px;
-  margin: 10px 0;
-}
-
+/* ================= QUESTION & PROGRESS ================= */
 #progress {
   font-size: 14px;
   color: var(--text-secondary);
   margin-bottom: 15px;
 }
 
-/* ================= ANSWERS ================= */
+#question {
+  font-size: 22px;
+  margin: 10px 0 15px;
+}
+
+/* ================= MULTIPLE CHOICE ================= */
 #answerArea button {
   background: var(--bg-elevated);
   border: 1px solid #2f2f2f;
+  margin: 10px 0;
 }
 
 /* ================= FEEDBACK ================= */
@@ -136,6 +150,15 @@ button:disabled {
 <label>Category</label>
 <select id="category">
   <option value="world">World</option>
+  <option value="africa">Africa</option>
+  <option value="asia">Asia</option>
+  <option value="europe">Europe</option>
+  <option value="northamerica">North America</option>
+  <option value="southamerica">South America</option>
+  <option value="oceania">Oceania</option>
+  <option value="middleeast">Middle East</option>
+  <option value="india">India</option>
+  <option value="canada">Canada</option>
 </select>
 
 <div class="mc-toggle">
@@ -159,18 +182,12 @@ button:disabled {
 <div id="score">Score: 0 / 0</div>
 
 <script>
-/* ---------------- CONFIG ---------------- */
 const SESSION_LIMIT = 25;
+let score = 0, total = 0, incorrect = 0;
+let currentAnswer = [], questionPool = [], selectedMC = "";
+const soundCorrect = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
+const soundWrong = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
 
-/* ---------------- STATE ---------------- */
-let score = 0;
-let total = 0;
-let incorrect = 0;
-let currentAnswer = [];
-let questionPool = [];
-let answered = false;
-
-/* ---------------- FULL WORLD DATA ---------------- */
 const worldCapitals = {
 "Afghanistan":["Kabul"],"Albania":["Tirana"],"Algeria":["Algiers"],"Andorra":["Andorra la Vella"],
 "Angola":["Luanda"],"Antigua and Barbuda":["Saint John's"],"Argentina":["Buenos Aires"],
@@ -213,28 +230,53 @@ const worldCapitals = {
 "New Zealand":["Wellington"],"Nicaragua":["Managua"],"Niger":["Niamey"],
 "Nigeria":["Abuja"],"North Korea":["Pyongyang"],
 "North Macedonia":["Skopje"],"Norway":["Oslo"],"Oman":["Muscat"],
-"Pakistan":["Islamabad"],"Palestine":["Ramallah"],"Panama":["Panama City"],
-"Papua New Guinea":["Port Moresby"],"Paraguay":["Asuncion"],
-"Peru":["Lima"],"Philippines":["Manila"],"Poland":["Warsaw"],
-"Portugal":["Lisbon"],"Qatar":["Doha"],"Romania":["Bucharest"],
-"Russia":["Moscow"],"Rwanda":["Kigali"],"Saudi Arabia":["Riyadh"],
-"Senegal":["Dakar"],"Serbia":["Belgrade"],"Seychelles":["Victoria"],
-"Sierra Leone":["Freetown"],"Singapore":["Singapore"],
-"Slovakia":["Bratislava"],"Slovenia":["Ljubljana"],
-"South Africa":["Pretoria","Cape Town","Bloemfontein"],
+"Pakistan":["Islamabad"],"Palestine":["Ramallah"],
+"Panama":["Panama City"],"Papua New Guinea":["Port Moresby"],
+"Paraguay":["Asuncion"],"Peru":["Lima"],"Philippines":["Manila"],
+"Poland":["Warsaw"],"Portugal":["Lisbon"],"Qatar":["Doha"],
+"Romania":["Bucharest"],"Russia":["Moscow"],"Rwanda":["Kigali"],
+"Saudi Arabia":["Riyadh"],"Senegal":["Dakar"],"Serbia":["Belgrade"],
+"Seychelles":["Victoria"],"Sierra Leone":["Freetown"],
+"Singapore":["Singapore"],"Slovakia":["Bratislava"],
+"Slovenia":["Ljubljana"],"South Africa":["Pretoria","Cape Town","Bloemfontein"],
 "South Sudan":["Juba"],"Spain":["Madrid"],
 "Sri Lanka":["Sri Jayawardenepura Kotte","Colombo"],
 "Sudan":["Khartoum"],"Suriname":["Paramaribo"],
 "Sweden":["Stockholm"],"Switzerland":["Bern"],"Syria":["Damascus"],
-"Taiwan":["Taipei"],"Tajikistan":["Dushanbe"],"Tanzania":["Dodoma"],
-"Thailand":["Bangkok"],"Togo":["Lome"],"Tunisia":["Tunis"],
-"Turkey":["Ankara"],"Uganda":["Kampala"],"Ukraine":["Kyiv"],
-"United Arab Emirates":["Abu Dhabi"],"United Kingdom":["London"],
-"United States":["Washington D.C."],"Uruguay":["Montevideo"],
-"Uzbekistan":["Tashkent"],"Vatican City":["Vatican City"],
-"Venezuela":["Caracas"],"Vietnam":["Hanoi"],"Yemen":["Sana'a"],
+"Taiwan":["Taipei"],"Tajikistan":["Dushanbe"],
+"Tanzania":["Dodoma"],"Thailand":["Bangkok"],
+"Togo":["Lome"],"Tunisia":["Tunis"],
+"Turkey":["Ankara"],"Uganda":["Kampala"],
+"Ukraine":["Kyiv"],
+"United Arab Emirates":["Abu Dhabi"],
+"United Kingdom":["London"],
+"United States":["Washington D.C."],
+"Uruguay":["Montevideo"],"Uzbekistan":["Tashkent"],
+"Vatican City":["Vatican City"],
+"Venezuela":["Caracas"],"Vietnam":["Hanoi"],
+"Yemen":["Sana'a"],
 "Zambia":["Lusaka"],"Zimbabwe":["Harare"]
 };
+
+/* ---------------- HELPERS ---------------- */
+function normalize(str){return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z\s]/g,"").trim();}
+function similarity(a,b){
+  const m=[];for(let i=0;i<=b.length;i++)m[i]=[i];for(let j=0;j<=a.length;j++)m[0][j]=j;
+  for(let i=1;i<=b.length;i++)for(let j=1;j<=a.length;j++)
+    m[i][j]=b[i-1]==a[j-1]?m[i-1][j-1]:Math.min(m[i-1][j-1]+1,m[i][j-1]+1,m[i-1][j]+1);
+  return 1-m[b.length][a.length]/Math.max(a.length,b.length);
+}
+
+function getRandomChoices(correctAnswers){
+  const allCapitals = Object.values(worldCapitals).flat();
+  const correct = correctAnswers[Math.floor(Math.random()*correctAnswers.length)];
+  const choices = new Set([correct]);
+  while(choices.size<4){
+    const rand = allCapitals[Math.floor(Math.random()*allCapitals.length)];
+    if(!correctAnswers.includes(rand)) choices.add(rand);
+  }
+  return [...choices].sort(()=>Math.random()-0.5);
+}
 
 /* ---------------- GAME FLOW ---------------- */
 function startQuiz(){
@@ -248,65 +290,39 @@ function nextQuestion(){
   if(total>=SESSION_LIMIT){
     question.innerText="Session Complete 🎉";
     answerArea.innerHTML="";
+    progress.innerText="";
     return;
   }
-
-  answered=false;
-  submitBtn.disabled=true;
-  nextBtn.disabled=true;
+  submitBtn.disabled=true; nextBtn.disabled=true; selectedMC="";
   result.innerHTML="";
-
-  const country=questionPool.pop();
-  currentAnswer=worldCapitals[country];
+  const country = questionPool.pop();
+  currentAnswer = worldCapitals[country];
   question.innerText=`Capital of ${country}?`;
   progress.innerText=`Question ${total+1} of ${SESSION_LIMIT}`;
-
   if(mcMode.checked){
-    const choices=[...currentAnswer,"Rome","Madrid","Vienna","Lisbon"]
-      .sort(()=>Math.random()-0.5).slice(0,4);
-    answerArea.innerHTML=choices.map(c=>
-      `<button onclick="selectMC('${c}')">${c}</button>`).join("");
+    const choices = getRandomChoices(currentAnswer);
+    answerArea.innerHTML=choices.map(c=>`<button onclick="selectMC('${c}')">${c}</button>`).join("");
   } else {
     answerArea.innerHTML=`<input id="textAnswer" placeholder="Type your answer…" oninput="submitBtn.disabled=false">`;
   }
 }
 
-let selectedMC="";
-function selectMC(val){
-  selectedMC=val;
-  submitBtn.disabled=false;
-}
+function selectMC(val){selectedMC=val; submitBtn.disabled=false;}
 
 function submitAnswer(){
   const input=selectedMC||document.getElementById("textAnswer")?.value;
   if(!input) return;
-
   total++;
-  answered=true;
-
-  if(currentAnswer.includes(input)){
-    score++;
-    result.innerHTML="<div class='correct'>✔ Correct</div>";
-  } else {
-    incorrect++;
-    result.innerHTML="<div class='wrong'>✖ "+currentAnswer.join(", ")+"</div>";
-  }
-
+  if(currentAnswer.some(a=>normalize(a)===normalize(input)||similarity(a,input)>0.8)){
+    score++; result.innerHTML="<div class='correct'>✔ Correct</div>";
+  } else { incorrect++; result.innerHTML="<div class='wrong'>✖ "+currentAnswer.join(", ")+"</div>"; }
   updateScore();
-  submitBtn.disabled=true;
-  nextBtn.disabled=false;
-  selectedMC="";
+  submitBtn.disabled=true; nextBtn.disabled=false; selectedMC="";
 }
 
-function revealAnswer(){
-  result.innerHTML="<div class='accepted'>💡 "+currentAnswer.join(", ")+"</div>";
-}
-
-function resetQuiz(){ startQuiz(); }
-
-function updateScore(){
-  scoreDisplay.innerText=`Score: ${score} / ${total}`;
-}
+function revealAnswer(){result.innerHTML="<div class='accepted'>💡 "+currentAnswer.join(", ")+"</div>";}
+function resetQuiz(){startQuiz();}
+function updateScore(){document.getElementById("score").innerText=`Score: ${score} / ${total}`;}
 </script>
 
 </body>
