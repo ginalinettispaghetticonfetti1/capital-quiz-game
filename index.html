@@ -61,6 +61,7 @@ button:hover { background: #1c54b2; }
 <button onclick="submitAnswer()">Submit</button>
 <button onclick="nextQuestion()">Next</button>
 <button onclick="resetScore()">Reset Score</button>
+<button onclick="revealAnswer()">Reveal Answer</button>
 
 <div id="result"></div>
 <div id="score">Score: 0 / 0</div>
@@ -158,9 +159,20 @@ function normalize(str) {
   return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z\s]/g,"").replace(/\s+/g," ").trim();
 }
 
-function levenshtein(a,b){const matrix=Array.from({length:b.length+1},(_,i)=>[i]);for(let j=0;j<=a.length;j++)matrix[0][j]=j;for(let i=1;i<=b.length;i++){for(let j=1;j<=a.length;j++){matrix[i][j]=b[i-1]===a[j-1]?matrix[i-1][j-1]:Math.min(matrix[i-1][j-1]+1,matrix[i][j-1]+1,matrix[i-1][j]+1)}}return matrix[b.length][a.length];}
+function levenshtein(a,b){
+  const matrix=Array.from({length:b.length+1},(_,i)=>[i]);
+  for(let j=0;j<=a.length;j++) matrix[0][j]=j;
+  for(let i=1;i<=b.length;i++){
+    for(let j=1;j<=a.length;j++){
+      matrix[i][j]=b[i-1]===a[j-1]?matrix[i-1][j-1]:Math.min(matrix[i-1][j-1]+1,matrix[i][j-1]+1,matrix[i-1][j]+1);
+    }
+  }
+  return matrix[b.length][a.length];
+}
 
-function similarity(a,b){return 1-levenshtein(a,b)/Math.max(a.length,b.length);}
+function similarity(a,b){
+  return 1-levenshtein(a,b)/Math.max(a.length,b.length);
+}
 
 // -------- GAME FUNCTIONS --------
 function getCurrentCategoryData(){
@@ -200,8 +212,8 @@ function renderInput(){
 function submitAnswer(selected){
   let userAnswer=selected;
   const inputField=document.getElementById("textAnswer");
-  if(!userAnswer&&inputField)userAnswer=inputField.value.trim();
-  if(!userAnswer)return;
+  if(!userAnswer&&inputField) userAnswer=inputField.value.trim();
+  if(!userAnswer) return;
   total++;
   const difficulty=document.getElementById("difficulty").value;
   const user=normalize(userAnswer);
@@ -223,6 +235,11 @@ function submitAnswer(selected){
 }
 
 function resetScore(){score=0;total=0;document.getElementById("score").innerText="Score: 0 / 0";document.getElementById("result").innerHTML="";}
+
+// -------- REVEAL ANSWER --------
+function revealAnswer(){
+  document.getElementById("result").innerHTML=`<div class="accepted">💡 Answer: ${currentAnswer.join(", ")}</div>`;
+}
 
 nextQuestion();
 </script>
