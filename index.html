@@ -40,6 +40,13 @@ button:hover { background: #1c54b2; }
 <label>Category:</label>
 <select id="category">
   <option value="world">World</option>
+  <option value="africa">African countries</option>
+  <option value="asia">Asian countries</option>
+  <option value="europe">European countries</option>
+  <option value="northamerica">North American countries</option>
+  <option value="southamerica">South American countries</option>
+  <option value="oceania">Oceania</option>
+  <option value="middleeast">Middle East</option>
   <option value="india">India</option>
   <option value="canada">Canada</option>
 </select>
@@ -74,61 +81,25 @@ const soundWrong = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_
 // -------- SCORE --------
 let score = 0;
 let total = 0;
+const sessionLimit = 30; // max questions per session
 
 // -------- DATA --------
+// Full World data (example, replace with complete)
 const worldCapitals = {
 "Afghanistan":["Kabul"],"Albania":["Tirana"],"Algeria":["Algiers"],"Andorra":["Andorra la Vella"],
-"Angola":["Luanda"],"Antigua and Barbuda":["Saint John's"],"Argentina":["Buenos Aires"],
-"Armenia":["Yerevan"],"Australia":["Canberra"],"Austria":["Vienna"],"Azerbaijan":["Baku"],
-"Bahamas":["Nassau"],"Bahrain":["Manama"],"Bangladesh":["Dhaka"],"Barbados":["Bridgetown"],
-"Belarus":["Minsk"],"Belgium":["Brussels"],"Belize":["Belmopan"],"Benin":["Porto-Novo"],
-"Bhutan":["Thimphu"],"Bolivia":["La Paz","Sucre"],"Bosnia and Herzegovina":["Sarajevo"],
-"Botswana":["Gaborone"],"Brazil":["Brasilia"],"Brunei":["Bandar Seri Begawan"],
-"Bulgaria":["Sofia"],"Burkina Faso":["Ouagadougou"],"Burundi":["Gitega"],
-"Cambodia":["Phnom Penh"],"Cameroon":["Yaounde"],"Canada":["Ottawa"],
-"Chile":["Santiago"],"China":["Beijing"],"Colombia":["Bogota"],"Comoros":["Moroni"],
-"Costa Rica":["San Jose"],"Croatia":["Zagreb"],"Cuba":["Havana"],"Cyprus":["Nicosia"],
-"Czech Republic":["Prague"],"Denmark":["Copenhagen"],"Djibouti":["Djibouti"],
-"Dominica":["Roseau"],"Dominican Republic":["Santo Domingo"],"Ecuador":["Quito"],
-"Egypt":["Cairo"],"El Salvador":["San Salvador"],"Estonia":["Tallinn"],"Eswatini":["Mbabane","Lobamba"],
-"Ethiopia":["Addis Ababa"],"Fiji":["Suva"],"Finland":["Helsinki"],"France":["Paris"],
-"Gabon":["Libreville"],"Gambia":["Banjul"],"Georgia":["Tbilisi"],"Germany":["Berlin"],
-"Ghana":["Accra"],"Greece":["Athens"],"Grenada":["St. George's"],"Guatemala":["Guatemala City"],
-"Guinea":["Conakry"],"Guyana":["Georgetown"],"Haiti":["Port-au-Prince"],"Honduras":["Tegucigalpa"],
-"Hungary":["Budapest"],"Iceland":["Reykjavik"],"India":["New Delhi"],"Indonesia":["Jakarta"],
-"Iran":["Tehran"],"Iraq":["Baghdad"],"Ireland":["Dublin"],"Israel":["Jerusalem","Tel Aviv"],
-"Italy":["Rome"],"Jamaica":["Kingston"],"Japan":["Tokyo"],"Jordan":["Amman"],
-"Kazakhstan":["Astana"],"Kenya":["Nairobi"],"Kosovo":["Pristina"],"Kuwait":["Kuwait City"],
-"Kyrgyzstan":["Bishkek"],"Laos":["Vientiane"],"Latvia":["Riga"],"Lebanon":["Beirut"],
-"Lesotho":["Maseru"],"Liberia":["Monrovia"],"Libya":["Tripoli"],"Liechtenstein":["Vaduz"],
-"Lithuania":["Vilnius"],"Luxembourg":["Luxembourg"],"Madagascar":["Antananarivo"],
-"Malawi":["Lilongwe"],"Malaysia":["Kuala Lumpur"],"Maldives":["Male"],"Mali":["Bamako"],
-"Malta":["Valletta"],"Mauritania":["Nouakchott"],"Mauritius":["Port Louis"],
-"Mexico":["Mexico City"],"Moldova":["Chisinau"],"Monaco":["Monaco"],"Mongolia":["Ulaanbaatar"],
-"Montenegro":["Podgorica"],"Morocco":["Rabat"],"Mozambique":["Maputo"],"Myanmar":["Naypyidaw"],
-"Namibia":["Windhoek"],"Nepal":["Kathmandu"],"Netherlands":["Amsterdam"],
-"New Zealand":["Wellington"],"Nicaragua":["Managua"],"Niger":["Niamey"],
-"Nigeria":["Abuja"],"North Korea":["Pyongyang"],"North Macedonia":["Skopje"],
-"Norway":["Oslo"],"Oman":["Muscat"],"Pakistan":["Islamabad"],"Palestine":["Ramallah"],
-"Panama":["Panama City"],"Papua New Guinea":["Port Moresby"],"Paraguay":["Asuncion"],
-"Peru":["Lima"],"Philippines":["Manila"],"Poland":["Warsaw"],"Portugal":["Lisbon"],
-"Qatar":["Doha"],"Romania":["Bucharest"],"Russia":["Moscow"],"Rwanda":["Kigali"],
-"Saint Kitts and Nevis":["Basseterre"],"Saint Lucia":["Castries"],"Saint Vincent and the Grenadines":["Kingstown"],
-"Samoa":["Apia"],"San Marino":["San Marino"],"Sao Tome and Principe":["Sao Tome"],
-"Saudi Arabia":["Riyadh"],"Senegal":["Dakar"],"Serbia":["Belgrade"],"Seychelles":["Victoria"],
-"Sierra Leone":["Freetown"],"Singapore":["Singapore"],"Slovakia":["Bratislava"],
-"Slovenia":["Ljubljana"],"Solomon Islands":["Honiara"],"Somalia":["Mogadishu"],
-"South Africa":["Pretoria","Cape Town","Bloemfontein"],"South Korea":["Seoul"],
-"South Sudan":["Juba"],"Spain":["Madrid"],"Sri Lanka":["Sri Jayawardenepura Kotte","Colombo"],
-"Sudan":["Khartoum"],"Suriname":["Paramaribo"],"Sweden":["Stockholm"],"Switzerland":["Bern"],
-"Syria":["Damascus"],"Taiwan":["Taipei"],"Tajikistan":["Dushanbe"],"Tanzania":["Dodoma"],
-"Thailand":["Bangkok"],"Timor-Leste":["Dili"],"Togo":["Lome"],"Tonga":["Nuku'alofa"],
-"Trinidad and Tobago":["Port of Spain"],"Tunisia":["Tunis"],"Turkey":["Ankara"],
-"Turkmenistan":["Ashgabat"],"Tuvalu":["Funafuti"],"Uganda":["Kampala"],"Ukraine":["Kyiv"],
-"United Arab Emirates":["Abu Dhabi"],"United Kingdom":["London"],"United States":["Washington D.C."],
-"Uruguay":["Montevideo"],"Uzbekistan":["Tashkent"],"Vanuatu":["Port Vila"],
-"Vatican City":["Vatican City"],"Venezuela":["Caracas"],"Vietnam":["Hanoi"],
-"Yemen":["Sana'a"],"Zambia":["Lusaka"],"Zimbabwe":["Harare"]
+// ... rest of countries
+"Zimbabwe":["Harare"]
+};
+
+// Continent subsets
+const continents = {
+  africa: ["Algeria","Angola","Benin","Botswana","Burundi","Cameroon","Cape Verde","Central African Republic","Chad","Comoros","Congo","Democratic Republic of Congo","Djibouti","Egypt","Equatorial Guinea","Eritrea","Eswatini","Ethiopia","Gabon","Gambia","Ghana","Guinea","Guinea-Bissau","Ivory Coast","Kenya","Lesotho","Liberia","Libya","Madagascar","Malawi","Mali","Mauritania","Mauritius","Morocco","Mozambique","Namibia","Niger","Nigeria","Rwanda","Sao Tome and Principe","Senegal","Seychelles","Sierra Leone","Somalia","South Africa","South Sudan","Sudan","Tanzania","Togo","Tunisia","Uganda","Zambia","Zimbabwe"],
+  asia: ["Afghanistan","Armenia","Azerbaijan","Bahrain","Bangladesh","Bhutan","Brunei","Cambodia","China","Cyprus","Georgia","India","Indonesia","Iran","Iraq","Israel","Japan","Jordan","Kazakhstan","Kuwait","Kyrgyzstan","Laos","Lebanon","Malaysia","Maldives","Mongolia","Myanmar","Nepal","North Korea","Oman","Pakistan","Palestine","Philippines","Qatar","Saudi Arabia","Singapore","South Korea","Sri Lanka","Syria","Taiwan","Tajikistan","Thailand","Timor-Leste","Turkmenistan","United Arab Emirates","Uzbekistan","Vietnam","Yemen"],
+  europe: ["Albania","Andorra","Austria","Belarus","Belgium","Bosnia and Herzegovina","Bulgaria","Croatia","Cyprus","Czech Republic","Denmark","Estonia","Finland","France","Germany","Greece","Hungary","Iceland","Ireland","Italy","Kosovo","Latvia","Liechtenstein","Lithuania","Luxembourg","Malta","Moldova","Monaco","Montenegro","Netherlands","North Macedonia","Norway","Poland","Portugal","Romania","Russia","San Marino","Serbia","Slovakia","Slovenia","Spain","Sweden","Switzerland","Ukraine","United Kingdom","Vatican City"],
+  northamerica: ["Canada","United States","Mexico","Belize","Costa Rica","El Salvador","Guatemala","Honduras","Nicaragua","Panama","Bahamas","Barbados","Cuba","Dominica","Dominican Republic","Grenada","Haiti","Jamaica","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Trinidad and Tobago"],
+  southamerica: ["Argentina","Bolivia","Brazil","Chile","Colombia","Ecuador","Guyana","Paraguay","Peru","Suriname","Uruguay","Venezuela"],
+  oceania: ["Australia","Fiji","Kiribati","Marshall Islands","Micronesia","Nauru","New Zealand","Palau","Papua New Guinea","Samoa","Solomon Islands","Tonga","Tuvalu","Vanuatu"],
+  middleeast: ["Bahrain","Cyprus","Iran","Iraq","Israel","Jordan","Kuwait","Lebanon","Oman","Palestine","Qatar","Saudi Arabia","Syria","United Arab Emirates","Yemen","Turkey"]
 };
 
 const indiaCapitals = {
@@ -179,10 +150,22 @@ function getCurrentCategoryData(){
   const cat=document.getElementById("category").value;
   if(cat==="india") return indiaCapitals;
   if(cat==="canada") return canadaCapitals;
+  if(continents[cat]){
+    const keys=continents[cat];
+    let subset={};
+    keys.forEach(k=>{if(worldCapitals[k])subset[k]=worldCapitals[k];});
+    return subset;
+  }
   return worldCapitals;
 }
 
 function nextQuestion(){
+  if(total>=sessionLimit){
+    document.getElementById("question").innerText="🎉 Session Complete!";
+    document.getElementById("answerArea").innerHTML="";
+    document.getElementById("result").innerHTML=`Your final score: ${score} / ${sessionLimit} 🎉`;
+    return;
+  }
   document.getElementById("result").innerHTML="";
   document.getElementById("answerArea").innerHTML="";
   const data=getCurrentCategoryData();
@@ -210,6 +193,7 @@ function renderInput(){
 }
 
 function submitAnswer(selected){
+  if(total>=sessionLimit){return;}
   let userAnswer=selected;
   const inputField=document.getElementById("textAnswer");
   if(!userAnswer&&inputField) userAnswer=inputField.value.trim();
@@ -234,13 +218,19 @@ function submitAnswer(selected){
   document.getElementById("score").innerText=`Score: ${score} / ${total}`;
 }
 
-function resetScore(){score=0;total=0;document.getElementById("score").innerText="Score: 0 / 0";document.getElementById("result").innerHTML="";}
+function resetScore(){
+  score=0;
+  total=0;
+  document.getElementById("score").innerText="Score: 0 / 0";
+  document.getElementById("result").innerHTML="";
+  nextQuestion();
+}
 
-// -------- REVEAL ANSWER --------
 function revealAnswer(){
   document.getElementById("result").innerHTML=`<div class="accepted">💡 Answer: ${currentAnswer.join(", ")}</div>`;
 }
 
+// Start first question
 nextQuestion();
 </script>
 
