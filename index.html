@@ -20,6 +20,8 @@
   --success: #6FBF73;
   --warning: #E6C35C;
   --error: #CF6679;
+
+  --mc-selected: #FFF9C4; /* light yellow for selected MC answer */
 }
 
 /* ================= BASE ================= */
@@ -124,6 +126,11 @@ button:disabled {
   margin: 10px 0;
 }
 
+#answerArea button.selected {
+  background: var(--mc-selected);
+  color: #000000;
+}
+
 /* ================= FEEDBACK ================= */
 .correct { color: var(--success); }
 .accepted { color: var(--warning); }
@@ -222,13 +229,13 @@ const worldCapitals = {
 "Lithuania":["Vilnius"],"Luxembourg":["Luxembourg"],
 "Madagascar":["Antananarivo"],"Malawi":["Lilongwe"],
 "Malaysia":["Kuala Lumpur"],"Maldives":["Male"],"Mali":["Bamako"],
-"Malta":["Valletta"],"Mauritania":["Nouakchott"],"Mauritius":["Port Louis"],
-"Mexico":["Mexico City"],"Moldova":["Chisinau"],"Monaco":["Monaco"],
-"Mongolia":["Ulaanbaatar"],"Montenegro":["Podgorica"],
-"Morocco":["Rabat"],"Mozambique":["Maputo"],"Myanmar":["Naypyidaw"],
-"Namibia":["Windhoek"],"Nepal":["Kathmandu"],"Netherlands":["Amsterdam"],
-"New Zealand":["Wellington"],"Nicaragua":["Managua"],"Niger":["Niamey"],
-"Nigeria":["Abuja"],"North Korea":["Pyongyang"],
+"Malta":["Valletta"],"Mauritania":["Nouakchott"],
+"Mauritius":["Port Louis"],"Mexico":["Mexico City"],"Moldova":["Chisinau"],
+"Monaco":["Monaco"],"Mongolia":["Ulaanbaatar"],"Montenegro":["Podgorica"],
+"Morocco":["Rabat"],"Mozambique":["Maputo"],
+"Myanmar":["Naypyidaw"],"Namibia":["Windhoek"],"Nepal":["Kathmandu"],
+"Netherlands":["Amsterdam"],"New Zealand":["Wellington"],"Nicaragua":["Managua"],
+"Niger":["Niamey"],"Nigeria":["Abuja"],"North Korea":["Pyongyang"],
 "North Macedonia":["Skopje"],"Norway":["Oslo"],"Oman":["Muscat"],
 "Pakistan":["Islamabad"],"Palestine":["Ramallah"],
 "Panama":["Panama City"],"Papua New Guinea":["Port Moresby"],
@@ -260,66 +267,37 @@ const worldCapitals = {
 
 /* ---------------- HELPERS ---------------- */
 function normalize(str){return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z\s]/g,"").trim();}
-function similarity(a,b){
-  const m=[];for(let i=0;i<=b.length;i++)m[i]=[i];for(let j=0;j<=a.length;j++)m[0][j]=j;
-  for(let i=1;i<=b.length;i++)for(let j=1;j<=a.length;j++)
-    m[i][j]=b[i-1]==a[j-1]?m[i-1][j-1]:Math.min(m[i-1][j-1]+1,m[i][j-1]+1,m[i-1][j]+1);
-  return 1-m[b.length][a.length]/Math.max(a.length,b.length);
-}
-
-function getRandomChoices(correctAnswers){
-  const allCapitals = Object.values(worldCapitals).flat();
-  const correct = correctAnswers[Math.floor(Math.random()*correctAnswers.length)];
-  const choices = new Set([correct]);
-  while(choices.size<4){
-    const rand = allCapitals[Math.floor(Math.random()*allCapitals.length)];
-    if(!correctAnswers.includes(rand)) choices.add(rand);
-  }
-  return [...choices].sort(()=>Math.random()-0.5);
-}
+function similarity(a,b){const m=[];for(let i=0;i<=b.length;i++)m[i]=[i];for(let j=0;j<=a.length;j++)m[0][j]=j;for(let i=1;i<=b.length;i++)for(let j=1;j<=a.length;j++)m[i][j]=b[i-1]==a[j-1]?m[i-1][j-1]:Math.min(m[i-1][j-1]+1,m[i][j-1]+1,m[i-1][j]+1);return 1-m[b.length][a.length]/Math.max(a.length,b.length);}
+function getRandomChoices(correctAnswers){const allCapitals=Object.values(worldCapitals).flat();const correct=correctAnswers[Math.floor(Math.random()*correctAnswers.length)];const choices=new Set([correct]);while(choices.size<4){const rand=allCapitals[Math.floor(Math.random()*allCapitals.length)];if(!correctAnswers.includes(rand)) choices.add(rand);}return [...choices].sort(()=>Math.random()-0.5);}
 
 /* ---------------- GAME FLOW ---------------- */
-function startQuiz(){
-  score=total=incorrect=0;
-  questionPool=Object.keys(worldCapitals).sort(()=>Math.random()-0.5);
-  updateScore();
-  nextQuestion();
-}
-
+function startQuiz(){score=total=incorrect=0;questionPool=Object.keys(worldCapitals).sort(()=>Math.random()-0.5);updateScore();nextQuestion();}
 function nextQuestion(){
-  if(total>=SESSION_LIMIT){
-    question.innerText="Session Complete 🎉";
-    answerArea.innerHTML="";
-    progress.innerText="";
-    return;
-  }
-  submitBtn.disabled=true; nextBtn.disabled=true; selectedMC="";
-  result.innerHTML="";
-  const country = questionPool.pop();
-  currentAnswer = worldCapitals[country];
+  if(total>=SESSION_LIMIT){question.innerText="Session Complete 🎉";answerArea.innerHTML="";progress.innerText="";return;}
+  submitBtn.disabled=true; nextBtn.disabled=true; selectedMC=""; result.innerHTML="";
+  const country=questionPool.pop(); currentAnswer=worldCapitals[country];
   question.innerText=`Capital of ${country}?`;
   progress.innerText=`Question ${total+1} of ${SESSION_LIMIT}`;
   if(mcMode.checked){
-    const choices = getRandomChoices(currentAnswer);
-    answerArea.innerHTML=choices.map(c=>`<button onclick="selectMC('${c}')">${c}</button>`).join("");
+    const choices=getRandomChoices(currentAnswer);
+    answerArea.innerHTML=choices.map(c=>`<button onclick="selectMC('${c}', this)">${c}</button>`).join("");
   } else {
     answerArea.innerHTML=`<input id="textAnswer" placeholder="Type your answer…" oninput="submitBtn.disabled=false">`;
   }
 }
-
-function selectMC(val){selectedMC=val; submitBtn.disabled=false;}
-
+function selectMC(val, btn){
+  selectedMC=val;
+  submitBtn.disabled=false;
+  document.querySelectorAll('#answerArea button').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
 function submitAnswer(){
   const input=selectedMC||document.getElementById("textAnswer")?.value;
-  if(!input) return;
-  total++;
-  if(currentAnswer.some(a=>normalize(a)===normalize(input)||similarity(a,input)>0.8)){
-    score++; result.innerHTML="<div class='correct'>✔ Correct</div>";
-  } else { incorrect++; result.innerHTML="<div class='wrong'>✖ "+currentAnswer.join(", ")+"</div>"; }
-  updateScore();
-  submitBtn.disabled=true; nextBtn.disabled=false; selectedMC="";
+  if(!input) return; total++;
+  if(currentAnswer.some(a=>normalize(a)===normalize(input)||similarity(a,input)>0.8)){score++; result.innerHTML="<div class='correct'>✔ Correct</div>";}
+  else{incorrect++; result.innerHTML="<div class='wrong'>✖ "+currentAnswer.join(", ")+"</div>";}
+  updateScore(); submitBtn.disabled=true; nextBtn.disabled=false; selectedMC="";
 }
-
 function revealAnswer(){result.innerHTML="<div class='accepted'>💡 "+currentAnswer.join(", ")+"</div>";}
 function resetQuiz(){startQuiz();}
 function updateScore(){document.getElementById("score").innerText=`Score: ${score} / ${total}`;}
