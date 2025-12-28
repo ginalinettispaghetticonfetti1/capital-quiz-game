@@ -97,7 +97,7 @@ let incorrect = 0;
 let currentAnswer = [];
 let questionPool = [];
 
-/* ---------------- FULL WORLD DATA (195+) ---------------- */
+/* ---------------- FULL WORLD DATA ---------------- */
 const worldCapitals = {
 "Afghanistan":["Kabul"],"Albania":["Tirana"],"Algeria":["Algiers"],"Andorra":["Andorra la Vella"],
 "Angola":["Luanda"],"Antigua and Barbuda":["Saint John's"],"Argentina":["Buenos Aires"],
@@ -160,17 +160,6 @@ const worldCapitals = {
 "Zambia":["Lusaka"],"Zimbabwe":["Harare"]
 };
 
-/* ---------------- CONTINENTS ---------------- */
-const continents = {
-  africa:Object.keys(worldCapitals).filter(c=>["Africa"].includes("Africa")), // logical placeholder
-  asia:["India","China","Japan","Pakistan","Iran","Iraq","Saudi Arabia"],
-  europe:["France","Germany","Italy","Spain","United Kingdom"],
-  northamerica:["Canada","United States","Mexico"],
-  southamerica:["Brazil","Argentina","Chile","Peru"],
-  oceania:["Australia","New Zealand"],
-  middleeast:["Israel","Saudi Arabia","Iran","Iraq","Jordan","Kuwait","Qatar","UAE"]
-};
-
 /* ---------------- HELPERS ---------------- */
 function normalize(str){
   return str.toLowerCase().normalize("NFD")
@@ -193,21 +182,24 @@ function similarity(a,b){
   return 1-levenshtein(a,b)/Math.max(a.length,b.length);
 }
 
-/* ---------------- GAME FLOW ---------------- */
-function getCategoryData(){
-  const cat=category.value;
-  if(continents[cat]){
-    let s={};
-    continents[cat].forEach(c=>s[c]=worldCapitals[c]);
-    return s;
+/* ---------- MULTIPLE CHOICE (4 OPTIONS) ---------- */
+function getRandomChoices(correctAnswers){
+  const allCapitals = Object.values(worldCapitals).flat();
+  const correct = correctAnswers[Math.floor(Math.random()*correctAnswers.length)];
+  const choices = new Set([correct]);
+
+  while(choices.size < 4){
+    const rand = allCapitals[Math.floor(Math.random()*allCapitals.length)];
+    if(!correctAnswers.includes(rand)) choices.add(rand);
   }
-  return worldCapitals;
+  return [...choices].sort(()=>Math.random()-0.5);
 }
 
+/* ---------------- GAME FLOW ---------------- */
 function startQuiz(){
   score=total=incorrect=0;
   scoreDisplay();
-  questionPool=Object.keys(getCategoryData()).sort(()=>Math.random()-0.5);
+  questionPool=Object.keys(worldCapitals).sort(()=>Math.random()-0.5);
   nextQuestion();
 }
 
@@ -226,25 +218,44 @@ function nextQuestion(){
     answerArea.innerHTML="";
     return;
   }
+
   const country=questionPool.pop();
   currentAnswer=worldCapitals[country];
   question.innerText="Capital of "+country+"?";
-  answerArea.innerHTML=document.getElementById("mcMode").checked
-    ? currentAnswer.map(a=>`<button onclick="submitAnswer('${a}')">${a}</button>`).join("")
-    : `<input id="textAnswer" placeholder="Type answer">`;
+  result.innerHTML="";
+
+  if(document.getElementById("mcMode").checked){
+    const choices = getRandomChoices(currentAnswer);
+    answerArea.innerHTML = choices
+      .map(c=>`<button onclick="submitAnswer('${c}')">${c}</button>`)
+      .join("");
+  } else {
+    answerArea.innerHTML = `<input id="textAnswer" placeholder="Type answer">`;
+  }
 }
 
 function submitAnswer(ans){
-  let input=ans||textAnswer?.value;
-  if(!input)return;
+  const input = ans || document.getElementById("textAnswer")?.value;
+  if(!input) return;
+
   total++;
   let ok=false;
+
   currentAnswer.forEach(a=>{
     const u=normalize(input),c=normalize(a);
-    if(u===c||similarity(u,c)>0.8)ok=true;
+    if(u===c || similarity(u,c)>0.8) ok=true;
   });
-  if(ok){score++;soundCorrect.play();result.innerHTML="<div class='correct'>✅ Correct</div>";}
-  else{incorrect++;soundWrong.play();result.innerHTML="<div class='wrong'>❌ "+currentAnswer.join(", ")+"</div>";}
+
+  if(ok){
+    score++;
+    soundCorrect.play();
+    result.innerHTML="<div class='correct'>✅ Correct</div>";
+  } else {
+    incorrect++;
+    soundWrong.play();
+    result.innerHTML="<div class='wrong'>❌ "+currentAnswer.join(", ")+"</div>";
+  }
+
   scoreDisplay();
 }
 
@@ -252,10 +263,10 @@ function revealAnswer(){
   result.innerHTML="<div class='accepted'>💡 "+currentAnswer.join(", ")+"</div>";
 }
 
-function resetQuiz(){startQuiz();}
+function resetQuiz(){ startQuiz(); }
 
 function scoreDisplay(){
-  score.innerText=`Score: ${score} / ${total}`;
+  document.getElementById("score").innerText=`Score: ${score} / ${total}`;
 }
 </script>
 
