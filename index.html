@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
+/* ================= BASE ================= */
 body {
   font-family: Arial, sans-serif;
   background: #121212;
@@ -13,7 +14,9 @@ body {
   padding: 20px;
   text-align: center;
 }
-select, input, button {
+
+/* ================= FORM ELEMENTS ================= */
+select, input {
   width: 100%;
   max-width: 360px;
   padding: 12px;
@@ -21,16 +24,101 @@ select, input, button {
   font-size: 16px;
   border-radius: 6px;
   border: none;
+  background: #1e1e1e;
+  color: #ffffff;
 }
-select, input { background: #1e1e1e; color: white; }
-button { background: #2979ff; color: white; }
-button:hover { background: #1c54b2; }
 
-#question { font-size: 22px; margin: 20px 0; }
+/* ================= BUTTONS (BASE) ================= */
+button {
+  width: 100%;
+  max-width: 360px;
+  padding: 12px;
+  margin: 8px 0;
+  font-size: 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+/* ================= START QUIZ ================= */
+.start-btn {
+  background: #2e7d32;
+  color: #ffffff;
+  font-weight: bold;
+}
+.start-btn:hover {
+  background: #1b5e20;
+}
+
+/* ================= MC MODE TOGGLE ================= */
+.mc-toggle {
+  text-align: left;
+  max-width: 360px;
+  margin: 10px auto 20px;
+  padding-left: 12px;
+}
+
+/* ================= QUESTION ================= */
+#question {
+  font-size: 22px;
+  margin: 20px 0;
+}
+
+/* ================= MULTIPLE CHOICE OPTIONS ================= */
+#answerArea button {
+  background: #263238;
+  color: #e0f7fa;
+  border: 1px solid #37474f;
+  margin: 10px 0;
+}
+#answerArea button:hover {
+  background: #37474f;
+}
+
+/* ================= ACTION BUTTONS ================= */
+.actions {
+  margin-top: 30px;
+}
+
+.submit-btn {
+  background: #1976d2;
+}
+.submit-btn:hover {
+  background: #0d47a1;
+}
+
+.next-btn {
+  background: #7b1fa2;
+}
+.next-btn:hover {
+  background: #4a148c;
+}
+
+.reveal-btn {
+  background: #f9a825;
+  color: #000000;
+}
+.reveal-btn:hover {
+  background: #f57f17;
+}
+
+.reset-btn {
+  background: #c62828;
+}
+.reset-btn:hover {
+  background: #8e0000;
+}
+
+/* ================= FEEDBACK ================= */
 .correct { color: #4caf50; }
 .accepted { color: #ffeb3b; }
 .wrong { color: #f44336; }
-#score { margin-top: 10px; font-size: 18px; }
+
+#score {
+  margin-top: 10px;
+  font-size: 18px;
+}
+
 .breakdown {
   margin-top: 15px;
   background: #1e1e1e;
@@ -65,19 +153,23 @@ button:hover { background: #1c54b2; }
   <option value="hard">Hard</option>
 </select>
 
-<label>
-  <input type="checkbox" id="mcMode"> Multiple Choice Mode
-</label>
+<div class="mc-toggle">
+  <label>
+    <input type="checkbox" id="mcMode"> Multiple Choice Mode
+  </label>
+</div>
 
-<button onclick="startQuiz()">Start Quiz</button>
+<button class="start-btn" onclick="startQuiz()">START QUIZ</button>
 
 <div id="question"></div>
 <div id="answerArea"></div>
 
-<button onclick="submitAnswer()">Submit</button>
-<button onclick="nextQuestion()">Next</button>
-<button onclick="revealAnswer()">Reveal Answer</button>
-<button onclick="resetQuiz()">Reset</button>
+<div class="actions">
+  <button class="submit-btn" onclick="submitAnswer()">Submit</button>
+  <button class="next-btn" onclick="nextQuestion()">Next</button>
+  <button class="reveal-btn" onclick="revealAnswer()">Reveal Answer</button>
+  <button class="reset-btn" onclick="resetQuiz()">Reset</button>
+</div>
 
 <div id="result"></div>
 <div id="score">Score: 0 / 0</div>
@@ -97,7 +189,7 @@ let incorrect = 0;
 let currentAnswer = [];
 let questionPool = [];
 
-/* ---------------- FULL WORLD DATA ---------------- */
+/* ---------------- WORLD DATA ---------------- */
 const worldCapitals = {
 "Afghanistan":["Kabul"],"Albania":["Tirana"],"Algeria":["Algiers"],"Andorra":["Andorra la Vella"],
 "Angola":["Luanda"],"Antigua and Barbuda":["Saint John's"],"Argentina":["Buenos Aires"],
@@ -182,7 +274,7 @@ function similarity(a,b){
   return 1-levenshtein(a,b)/Math.max(a.length,b.length);
 }
 
-/* ---------- MULTIPLE CHOICE (4 OPTIONS) ---------- */
+/* ---------- MULTIPLE CHOICE ---------- */
 function getRandomChoices(correctAnswers){
   const allCapitals = Object.values(worldCapitals).flat();
   const correct = correctAnswers[Math.floor(Math.random()*correctAnswers.length)];
