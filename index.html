@@ -4,149 +4,28 @@
 <meta charset="UTF-8">
 <title>Capital Quiz Pro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
-:root {
-  --bg-main: #121212;
-  --bg-surface: #1e1e1e;
-  --bg-elevated: #242424;
-
-  --text-primary: #E0E0E0;
-  --text-secondary: rgba(224,224,224,0.6);
-
-  --accent: #357ABD;
-  --accent-hover: #2C6399;
-
-  --success: #6FBF73;
-  --warning: #E6C35C;
-  --error: #CF6679;
-
-  --mc-selected: #FFF9C4; /* light yellow for selected MC answer */
-}
-
-/* ================= BASE ================= */
-body {
-  font-family: Arial, sans-serif;
-  background: var(--bg-main);
-  color: var(--text-primary);
-  padding: 20px;
-  text-align: center;
-}
-
-/* ================= FORM ELEMENTS ================= */
-select, input {
-  width: 100%;
-  max-width: 360px;
-  padding: 12px;
-  margin: 8px 0;
-  font-size: 16px;
-  border-radius: 6px;
-  border: none;
-  background: var(--bg-surface);
-  color: var(--text-primary);
-}
-
-/* ================= BUTTONS ================= */
-button {
-  width: 100%;
-  max-width: 360px;
-  padding: 12px;
-  margin: 8px 0;
-  font-size: 16px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  color: var(--text-primary);
-}
-
-button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-/* ================= PRIMARY ACTION ================= */
-.start-btn,
-.submit-btn {
-  background: var(--accent);
-  font-weight: bold;
-}
-.start-btn:hover,
-.submit-btn:hover {
-  background: var(--accent-hover);
-}
-
-/* ================= SECONDARY ACTIONS ================= */
-.next-btn {
-  background: #4A4F7C;
-}
-.next-btn:hover {
-  background: #3F4369;
-}
-
-.reveal-btn {
-  background: var(--warning);
-  color: #2a2a2a;
-}
-.reveal-btn:hover {
-  background: #d6b44d;
-}
-
-.reset-btn {
-  background: var(--error);
-}
-.reset-btn:hover {
-  background: #b85667;
-}
-
-/* ================= MC TOGGLE ================= */
-.mc-toggle {
-  text-align: left;
-  max-width: 360px;
-  margin: 10px auto 20px;
-  padding-left: 12px;
-  color: var(--text-secondary);
-}
-
-/* ================= QUESTION & PROGRESS ================= */
-#progress {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-bottom: 15px;
-}
-
-#question {
-  font-size: 22px;
-  margin: 10px 0 15px;
-}
-
-/* ================= MULTIPLE CHOICE ================= */
-#answerArea button {
-  background: var(--bg-elevated);
-  border: 1px solid #2f2f2f;
-  margin: 10px 0;
-}
-
-#answerArea button.selected {
-  background: var(--mc-selected);
-  color: #000000;
-}
-
-/* ================= FEEDBACK ================= */
-.correct { color: var(--success); }
-.accepted { color: var(--warning); }
-.wrong { color: var(--error); }
-
-#score {
-  margin-top: 10px;
-  color: var(--text-secondary);
-}
-
-.breakdown {
-  margin-top: 15px;
-  background: var(--bg-surface);
-  padding: 15px;
-  border-radius: 8px;
-}
+:root{
+--bg-main:#121212;--bg-surface:#1e1e1e;--bg-elevated:#242424;
+--text-primary:#E0E0E0;--text-secondary:rgba(224,224,224,0.6);
+--accent:#357ABD;--accent-hover:#2C6399;
+--success:#6FBF73;--warning:#E6C35C;--error:#CF6679;
+--mc-selected:#FFF9C4}
+body{font-family:Arial,sans-serif;background:var(--bg-main);color:var(--text-primary);padding:20px;text-align:center}
+select,input,button{width:100%;max-width:360px;padding:12px;margin:8px 0;font-size:16px;border-radius:6px;border:none}
+select,input{background:var(--bg-surface);color:var(--text-primary)}
+button{cursor:pointer;color:var(--text-primary)}
+button:disabled{opacity:.45}
+.start-btn,.submit-btn{background:var(--accent);font-weight:bold}
+.next-btn{background:#4A4F7C}
+.reveal-btn{background:var(--warning);color:#2a2a2a}
+.reset-btn{background:var(--error)}
+.mc-toggle{max-width:360px;margin:10px auto;color:var(--text-secondary);text-align:left}
+#progress{font-size:14px;color:var(--text-secondary)}
+#question{font-size:22px;margin:10px 0}
+#answerArea button{background:var(--bg-elevated);border:1px solid #2f2f2f;margin:10px 0}
+#answerArea button.selected{background:var(--mc-selected);color:#000}
+.correct{color:var(--success)}.wrong{color:var(--error)}.accepted{color:var(--warning)}
 </style>
 </head>
 
@@ -156,20 +35,21 @@ button:disabled {
 
 <label>Category</label>
 <select id="category">
-  <option value="world">World</option>
-  <option value="africa">Africa</option>
-  <option value="asia">Asia</option>
-  <option value="europe">Europe</option>
-  <option value="northamerica">North America</option>
-  <option value="southamerica">South America</option>
-  <option value="oceania">Oceania</option>
-  <option value="middleeast">Middle East</option>
-  <option value="india">India</option>
-  <option value="canada">Canada</option>
+<option value="world">World</option>
+<option value="africa">Africa</option>
+<option value="asia">Asia</option>
+<option value="europe">Europe</option>
+<option value="northamerica">North America</option>
+<option value="southamerica">South America</option>
+<option value="oceania">Oceania</option>
+<option value="middleeast">Middle East</option>
+<option value="india">India</option>
+<option value="canada">Canada</option>
+<option value="us">United States</option>
 </select>
 
 <div class="mc-toggle">
-  <label><input type="checkbox" id="mcMode"> Multiple Choice Mode</label>
+<label><input type="checkbox" id="mcMode"> Multiple Choice Mode</label>
 </div>
 
 <button class="start-btn" onclick="startQuiz()">START QUIZ</button>
@@ -179,23 +59,22 @@ button:disabled {
 <div id="answerArea"></div>
 
 <div class="actions">
-  <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>Submit</button>
-  <button class="next-btn" id="nextBtn" onclick="nextQuestion()" disabled>Next</button>
-  <button class="reveal-btn" onclick="revealAnswer()">Reveal Answer</button>
-  <button class="reset-btn" onclick="resetQuiz()">Reset</button>
+<button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>Submit</button>
+<button class="next-btn" id="nextBtn" onclick="nextQuestion()" disabled>Next</button>
+<button class="reveal-btn" onclick="revealAnswer()">Reveal</button>
+<button class="reset-btn" onclick="resetQuiz()">Reset</button>
 </div>
 
 <div id="result"></div>
 <div id="score">Score: 0 / 0</div>
 
 <script>
-const SESSION_LIMIT = 25;
-let score = 0, total = 0, incorrect = 0;
-let currentAnswer = [], questionPool = [], selectedMC = "";
-const soundCorrect = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
-const soundWrong = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+const SESSION_LIMIT=25;
+let score=0,total=0,incorrect=0;
+let currentAnswer=[],questionPool=[],selectedMC="",activeSet={};
 
-const worldCapitals = {
+/* ===================== WORLD CAPITALS (FULL) ===================== */
+const worldCapitals={
 "Afghanistan":["Kabul"],"Albania":["Tirana"],"Algeria":["Algiers"],"Andorra":["Andorra la Vella"],
 "Angola":["Luanda"],"Antigua and Barbuda":["Saint John's"],"Argentina":["Buenos Aires"],
 "Armenia":["Yerevan"],"Australia":["Canberra"],"Austria":["Vienna"],"Azerbaijan":["Baku"],
@@ -265,38 +144,67 @@ const worldCapitals = {
 "Zambia":["Lusaka"],"Zimbabwe":["Harare"]
 };
 
-/* ---------------- HELPERS ---------------- */
-function normalize(str){return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z\s]/g,"").trim();}
-function similarity(a,b){const m=[];for(let i=0;i<=b.length;i++)m[i]=[i];for(let j=0;j<=a.length;j++)m[0][j]=j;for(let i=1;i<=b.length;i++)for(let j=1;j<=a.length;j++)m[i][j]=b[i-1]==a[j-1]?m[i-1][j-1]:Math.min(m[i-1][j-1]+1,m[i][j-1]+1,m[i-1][j]+1);return 1-m[b.length][a.length]/Math.max(a.length,b.length);}
-function getRandomChoices(correctAnswers){const allCapitals=Object.values(worldCapitals).flat();const correct=correctAnswers[Math.floor(Math.random()*correctAnswers.length)];const choices=new Set([correct]);while(choices.size<4){const rand=allCapitals[Math.floor(Math.random()*allCapitals.length)];if(!correctAnswers.includes(rand)) choices.add(rand);}return [...choices].sort(()=>Math.random()-0.5);}
+/* ===================== REGIONS ===================== */
+const regions={
+africa:["Algeria","Angola","Benin","Botswana","Burkina Faso","Burundi","Cameroon","Central African Republic","Chad","Comoros","Djibouti","Egypt","Equatorial Guinea","Eritrea","Eswatini","Ethiopia","Gabon","Gambia","Ghana","Guinea","Guinea-Bissau","Kenya","Lesotho","Liberia","Libya","Madagascar","Malawi","Mali","Mauritania","Mauritius","Morocco","Mozambique","Namibia","Niger","Nigeria","Rwanda","Senegal","Seychelles","Sierra Leone","South Africa","South Sudan","Sudan","Tanzania","Togo","Tunisia","Uganda","Zambia","Zimbabwe"],
+asia:["Afghanistan","Armenia","Azerbaijan","Bangladesh","Bhutan","Brunei","Cambodia","China","Georgia","Indonesia","Japan","Kazakhstan","Kyrgyzstan","Laos","Malaysia","Maldives","Mongolia","Myanmar","Nepal","North Korea","Pakistan","Philippines","Singapore","Sri Lanka","Taiwan","Tajikistan","Thailand","Uzbekistan","Vietnam"],
+europe:["Albania","Andorra","Austria","Belarus","Belgium","Bosnia and Herzegovina","Bulgaria","Croatia","Czech Republic","Denmark","Estonia","Finland","France","Germany","Greece","Hungary","Iceland","Ireland","Italy","Kosovo","Latvia","Liechtenstein","Lithuania","Luxembourg","Malta","Moldova","Monaco","Montenegro","Netherlands","North Macedonia","Norway","Poland","Portugal","Romania","Russia","Serbia","Slovakia","Slovenia","Spain","Sweden","Switzerland","Ukraine","United Kingdom","Vatican City"],
+northamerica:["Antigua and Barbuda","Bahamas","Barbados","Belize","Canada","Costa Rica","Cuba","Dominica","Dominican Republic","El Salvador","Grenada","Guatemala","Haiti","Honduras","Jamaica","Mexico","Nicaragua","Panama","United States"],
+southamerica:["Argentina","Bolivia","Brazil","Chile","Colombia","Ecuador","Guyana","Paraguay","Peru","Suriname","Uruguay","Venezuela"],
+oceania:["Australia","Fiji","New Zealand","Papua New Guinea"],
+middleeast:["Bahrain","Iran","Iraq","Israel","Jordan","Kuwait","Lebanon","Oman","Palestine","Qatar","Saudi Arabia","Syria","Turkey","United Arab Emirates","Yemen"]
+};
 
-/* ---------------- GAME FLOW ---------------- */
-function startQuiz(){score=total=incorrect=0;questionPool=Object.keys(worldCapitals).sort(()=>Math.random()-0.5);updateScore();nextQuestion();}
+/* ===================== SPECIAL REGIONS ===================== */
+const canadaCapitals={"Ontario":["Toronto"],"Quebec":["Quebec City"],"British Columbia":["Victoria"],"Alberta":["Edmonton"],"Manitoba":["Winnipeg"],"Saskatchewan":["Regina"],"Nova Scotia":["Halifax"],"New Brunswick":["Fredericton"],"Prince Edward Island":["Charlottetown"],"Newfoundland and Labrador":["St. John's"]};
+
+const indiaCapitals={"Andhra Pradesh":["Amaravati"],"Arunachal Pradesh":["Itanagar"],"Assam":["Dispur"],"Bihar":["Patna"],"Chhattisgarh":["Raipur"],"Goa":["Panaji"],"Gujarat":["Gandhinagar"],"Haryana":["Chandigarh"],"Himachal Pradesh":["Shimla"],"Jharkhand":["Ranchi"],"Karnataka":["Bengaluru"],"Kerala":["Thiruvananthapuram"],"Madhya Pradesh":["Bhopal"],"Maharashtra":["Mumbai"],"Punjab":["Chandigarh"],"Rajasthan":["Jaipur"],"Tamil Nadu":["Chennai"],"Telangana":["Hyderabad"],"Uttar Pradesh":["Lucknow"],"West Bengal":["Kolkata"]};
+
+const usCapitals={"Alabama":["Montgomery"],"Alaska":["Juneau"],"Arizona":["Phoenix"],"Arkansas":["Little Rock"],"California":["Sacramento"],"Colorado":["Denver"],"Connecticut":["Hartford"],"Delaware":["Dover"],"Florida":["Tallahassee"],"Georgia":["Atlanta"],"Hawaii":["Honolulu"],"Idaho":["Boise"],"Illinois":["Springfield"],"Indiana":["Indianapolis"],"Iowa":["Des Moines"],"Kansas":["Topeka"],"Kentucky":["Frankfort"],"Louisiana":["Baton Rouge"],"Maine":["Augusta"],"Maryland":["Annapolis"],"Massachusetts":["Boston"],"Michigan":["Lansing"],"Minnesota":["Saint Paul"],"Mississippi":["Jackson"],"Missouri":["Jefferson City"],"Montana":["Helena"],"Nebraska":["Lincoln"],"Nevada":["Carson City"],"New Hampshire":["Concord"],"New Jersey":["Trenton"],"New Mexico":["Santa Fe"],"New York":["Albany"],"North Carolina":["Raleigh"],"North Dakota":["Bismarck"],"Ohio":["Columbus"],"Oklahoma":["Oklahoma City"],"Oregon":["Salem"],"Pennsylvania":["Harrisburg"],"Rhode Island":["Providence"],"South Carolina":["Columbia"],"South Dakota":["Pierre"],"Tennessee":["Nashville"],"Texas":["Austin"],"Utah":["Salt Lake City"],"Vermont":["Montpelier"],"Virginia":["Richmond"],"Washington":["Olympia"],"West Virginia":["Charleston"],"Wisconsin":["Madison"],"Wyoming":["Cheyenne"],"District of Columbia":["Washington D.C."],"Puerto Rico":["San Juan"],"Guam":["Hagåtña"],"U.S. Virgin Islands":["Charlotte Amalie"],"American Samoa":["Pago Pago"],"Northern Mariana Islands":["Saipan"]};
+
+/* ===================== LOGIC ===================== */
+function normalize(s){return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z\s]/g,"").trim();}
+
+function getChoices(correct){
+const pool=Object.values(activeSet).flat();
+const c=correct[Math.floor(Math.random()*correct.length)];
+const set=new Set([c]);
+while(set.size<4){const r=pool[Math.floor(Math.random()*pool.length)];if(!correct.includes(r))set.add(r);}
+return [...set].sort(()=>Math.random()-.5);
+}
+
+function startQuiz(){
+score=total=incorrect=0;
+const c=category.value;
+if(c==="world"){questionPool=Object.keys(worldCapitals);activeSet=worldCapitals;}
+else if(c==="canada"){questionPool=Object.keys(canadaCapitals);activeSet=canadaCapitals;}
+else if(c==="india"){questionPool=Object.keys(indiaCapitals);activeSet=indiaCapitals;}
+else if(c==="us"){questionPool=Object.keys(usCapitals);activeSet=usCapitals;}
+else{questionPool=[...regions[c]];activeSet=worldCapitals;}
+questionPool.sort(()=>Math.random()-.5);
+updateScore();nextQuestion();
+}
+
 function nextQuestion(){
-  if(total>=SESSION_LIMIT){question.innerText="Session Complete 🎉";answerArea.innerHTML="";progress.innerText="";return;}
-  submitBtn.disabled=true; nextBtn.disabled=true; selectedMC=""; result.innerHTML="";
-  const country=questionPool.pop(); currentAnswer=worldCapitals[country];
-  question.innerText=`Capital of ${country}?`;
-  progress.innerText=`Question ${total+1} of ${SESSION_LIMIT}`;
-  if(mcMode.checked){
-    const choices=getRandomChoices(currentAnswer);
-    answerArea.innerHTML=choices.map(c=>`<button onclick="selectMC('${c}', this)">${c}</button>`).join("");
-  } else {
-    answerArea.innerHTML=`<input id="textAnswer" placeholder="Type your answer…" oninput="submitBtn.disabled=false">`;
-  }
+if(total>=SESSION_LIMIT||!questionPool.length){question.innerText="Session Complete 🎉";answerArea.innerHTML="";return;}
+submitBtn.disabled=true;nextBtn.disabled=true;selectedMC="";result.innerHTML="";
+const item=questionPool.pop();
+currentAnswer=activeSet[item];
+question.innerText=`Capital of ${item}?`;
+progress.innerText=`Question ${total+1} of ${SESSION_LIMIT}`;
+answerArea.innerHTML=mcMode.checked
+?getChoices(currentAnswer).map(c=>`<button onclick="selectMC('${c}',this)">${c}</button>`).join("")
+:`<input id="textAnswer" oninput="submitBtn.disabled=false">`;
 }
-function selectMC(val, btn){
-  selectedMC=val;
-  submitBtn.disabled=false;
-  document.querySelectorAll('#answerArea button').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');
-}
+
+function selectMC(v,b){selectedMC=v;submitBtn.disabled=false;document.querySelectorAll('#answerArea button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');}
+
 function submitAnswer(){
-  const input=selectedMC||document.getElementById("textAnswer")?.value;
-  if(!input) return; total++;
-  if(currentAnswer.some(a=>normalize(a)===normalize(input)||similarity(a,input)>0.8)){score++; result.innerHTML="<div class='correct'>✔ Correct</div>";}
-  else{incorrect++; result.innerHTML="<div class='wrong'>✖ "+currentAnswer.join(", ")+"</div>";}
-  updateScore(); submitBtn.disabled=true; nextBtn.disabled=false; selectedMC="";
+const input=selectedMC||document.getElementById("textAnswer")?.value;
+if(!input)return;total++;
+if(currentAnswer.some(a=>normalize(a)===normalize(input))){score++;result.innerHTML="<div class='correct'>✔ Correct</div>";}
+else{incorrect++;result.innerHTML="<div class='wrong'>✖ "+currentAnswer.join(", ")+"</div>";}
+updateScore();submitBtn.disabled=true;nextBtn.disabled=false;
 }
 function revealAnswer(){result.innerHTML="<div class='accepted'>💡 "+currentAnswer.join(", ")+"</div>";}
 function resetQuiz(){startQuiz();}
